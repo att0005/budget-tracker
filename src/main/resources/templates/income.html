@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head">
+</head>
+<script src="https://use.fontawesome.com/c0c323679c.js"></script>
+<script>
+var categoryList = [];
+var accountList = [];
+const monthNames = ["january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december"
+];
+$(document).ready(function(){
+	if(localStorage.getItem("userId") ==="" || localStorage.getItem("userId") === null 
+	|| localStorage.getItem("userId") === undefined){
+		window.location.replace("/");
+	} else {
+		$('#welcomeName').text("Welcome back, "+localStorage.getItem("firstName")+" "+localStorage.getItem("lastName"));
+	}
+	loadIncomeTableData();
+	loadBudgetTableData();
+	$('#incomeDatepicker').datepicker({
+        viewMode: "months", 
+        format: "dd-mm-yyyy",
+    	
+        autoclose: true
+    });
+	
+	$.ajax({
+		    type:"get",
+		    url:"/category/"+localStorage.getItem("userId"),
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var res = JSON.stringify(result);
+				categoryList = result;
+				$("#selectCategoryData").empty();
+				var categoryData = "<select id='selectedCategory' class='form-control'><option selected value=''>Select Category</option>";
+				for(var i in categoryList) { 
+					if(categoryList[i].type==="income"){
+					categoryData=categoryData+"<option value="+categoryList[i].id+">"+categoryList[i].title+"</option>";
+					}
+				}
+				categoryData=categoryData+"</select>";
+				$("#selectCategoryData").html(categoryData);
+				
+		    },error: function(err){
+			}
+		});
+	
+	$.ajax({
+		    type:"get",
+		    url:"/account/"+localStorage.getItem("userId"),
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var res = JSON.stringify(result);
+				accountList = result;
+				$("#selectAccountData").empty();
+				var accountData = "<select id='selectedAccount' class='form-control'><option selected value=''>Select Account</option>";
+				for(var i in accountList) { 
+					accountData=accountData+"<option value="+accountList[i].id+">"+accountList[i].name+"</option>";
+				}
+				accountData=accountData+"</select>";
+				$("#selectAccountData").html(accountData);
+		    },error: function(err){
+			}
+		});
+		
+		
+	var totalSpent = 0;
+	var totalEarn=0;
+	var totalEstiSpent=0;
+	var totalEstiEarn=0;
+	var spentPercentage=0;
+	var earnPercentage=0; 
+  	function loadBudgetTableData() {
+		$.ajax({
+		    type:"get",
+		    url:"/budget/"+localStorage.getItem("userId")+"/"+monthNames[d.getMonth()]+"/"+new Date().getFullYear(),
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var res = JSON.stringify(result);
+				accountList = result;
+				$("#budgetTableData").empty();
+				var expenseData = "";
+				for(var i in accountList.budgetTableResponse) { 
+					expenseData=expenseData+"<br><br><div class='card' style='background-color:#EEF2FC !important'><div class='card-body'><div class='row'><div class='col-3 mx-auto' style='margin-top:18px'><h4>"+accountList.budgetTableResponse[i].categoryName+"</h4></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price;
+					if(accountList.budgetTableResponse[i].type==='expense'){
+						expenseData=expenseData+"</h4><small style='font-family: cursive;'>spent</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. expense</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div></div></div></div>";
+					} else {
+						expenseData=expenseData+"</h4><small style='font-family: cursive;'>earned</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. income</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div></div></div></div>";
+					}
+				}
+				totalSpent = accountList.totalSpent;
+				totalEarn = accountList.totalEarn;
+				totalEstiSpent = accountList.totalEstiSpent;
+				totalEstiEarn = accountList.totalEstiEarn;
+				spentPercentage = accountList.spentPercentage;
+				earnPercentage = accountList.earnPercentage;
+				
+				$('.totalIncomeSpentPercent').text(earnPercentage+"%");
+				$('.totalExpenseSpentPercent').text(spentPercentage+"%");
+				$('.totalExpenseSpent').text("$"+totalSpent+" out of $"+totalEstiSpent);
+				$('.totalIncomeSpent').text("$"+totalEarn+" out of $"+totalEstiEarn);
+				$('.progressIncomeCircle').attr("data-value", earnPercentage);
+				$('.progressExpenseCircle').attr("data-value", spentPercentage);
+				$("#budgetTableData").html(expenseData);
+				
+			  $(".progressIncomeCircle").each(function() {
+			    var value = earnPercentage;
+			    var left = $(this).find('.progress-left .progress-bar');
+			    var right = $(this).find('.progress-right .progress-bar');
+			
+			    if (value > 0) {
+			      if (value <= 50) {
+			        right.css('transform', 'rotate(' + percentageToDegrees(value) + 'deg)')
+			      } else {
+			        right.css('transform', 'rotate(180deg)')
+			        left.css('transform', 'rotate(' + percentageToDegrees(value - 50) + 'deg)')
+			      }
+			    }
+			
+			  })
+				
+				
+		    },error: function(err){
+			}
+		});
+  	}
+  
+  function percentageToDegrees(percentage) {
+
+    return percentage / 100 * 360
+
+  }
+  
+  $("#addIncomeBtn").click(function(){
+	$("#addIncomeModal").modal('toggle');
+	});
+	
+	
+});
+
+</script>
+<body>
+
+<!--Navbar-->
+<nav th:replace="fragments/header :: nav"></nav>
+
+<div style="padding:25px;">
+    <div class="row">
+    <div class="col-9 mx-auto"  style="width: 20rem; margin-top: 50px;padding:25px;">
+    	<h3 id="welcomeName" style="font-family: cursive;font-size: 40px;"></h3>
+    	<small style="font-family: cursive;">These is your income, Make as much as you can!</small>
+    </div>
+    <div class="col-3 mx-auto" style="width: 20rem; margin-top: 50px;padding:30px;">
+        <button type="button" id="addIncomeBtn"class="btn btn-success" style="float: right;" data-toggle="modal"><i class="fa fa-fax fa-fw"></i> Add Income</button>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-7 mx-auto card"  style="width: 20rem; margin-top: 20px;padding:25px;">
+    <h3>Income Records</h3>
+		<div id="incomeTableData"></div>
+    </div>
+    <div class="col-4 mx-auto card"  style="width: 20rem; margin-top: 20px;padding:25px;max-height:310px">
+      <div class="bg-white rounded-lgshadow">
+        <h4 class="font-weight-bold text-center">Income Progress Based on Budget</h4>
+
+        <!-- Progress bar 3 -->
+        <div class="progress mx-auto  p-5 progressIncomeCircle" data-value='10'>
+          <span class="progress-left">
+                        <span class="progress-bar border-success"></span>
+          </span>
+          <span class="progress-right">
+                        <span class="progress-bar border-success"></span>
+          </span>
+          <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+            <div class="h2 font-weight-bold totalIncomeSpentPercent" ></div><br></br>
+            <small style="font-family: cursive;"> earned</small>
+          </div>
+        </div>
+        <!-- END -->
+
+        <!-- Demo info -->
+        <div class="row text-center mt-4">
+          <div class="col-12 border-right justify-content-center">
+            <small style="font-family: cursive;">You have earned</small>
+            <div class="h4 font-weight-bold mb-0"><span class="totalIncomeSpent"></span></div>
+          </div>
+          <div class="col-6">
+            
+          </div>
+        </div>
+        <!-- END -->
+      </div>
+    </div>
+   </div>
+</div>
+
+
+<div class="modal" id="addIncomeModal" tabindex="-1" role="dialog" aria-labelledby="addIncomeModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addIncomeModalLabel">Add Income</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <div class="form-group">
+		    <label for="exampleInputEmail1">Income Title</label>
+		    <input type="text" class="form-control" id="incomeName" placeholder="Income Name">
+		  </div>
+		  
+		  <div class="form-group">
+		    <label for="exampleInputEmail1">Amount ($)</label>
+		    <input type="text" class="form-control" id="incomeAmount" placeholder="Amount">
+		  </div>
+		  
+		  <div class="form-group">
+		  	<label for="exampleInputEmail1">Select Category</label>
+		      <div id="selectCategoryData"></div>
+		    </div>
+		    
+		    <div class="form-group">
+		    <label for="exampleInputEmail1">Select Account</label>
+		      <div id="selectAccountData"></div>
+		    </div>
+		    
+		    <div class="form-group">
+		  	<label for="exampleInputEmail1">Select Date</label>
+		      <input class="form-control" data-date-format="dd-mm-yyyy" id="incomeDatepicker">
+		    </div>
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button"  id="incomeSubmit"  class="btn btn-primary">Add</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="modal" id="incomeAddeddSuccessAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-check-circle  fa-5x" aria-hidden="true" style="color: green;"></i><br>
+    	<h4>Income added successfully!</h4><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="categoryModalLabel">Add Category</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+       	<div class="form-group">
+		    <label for="exampleInputEmail1">Category Name</label>
+		    <input type="text" class="form-control" id="categoryName" placeholder="Category Name">
+		  </div>
+		  
+		  <div class="form-group">
+		    <label for="exampleFormControlTextarea1">Category Description</label>
+		    <textarea class="form-control" id="categoryDesc" rows="3"></textarea>
+		  </div>
+		  <div class="form-group">
+		      <select id="categoryType" class="form-control">
+		        <option selected value="expense">Expense</option>
+		        <option value="income">Income</option>
+		      </select>
+		    </div>
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button" id="categorySubmit" class="btn btn-primary">Add</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal" id="accountModal" tabindex="-1" role="dialog" aria-labelledby="accountModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="accountModalLabel">Add Account</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+       	<div class="form-group">
+		    <label for="exampleInputEmail2">Account Name</label>
+		    <input type="text" class="form-control" id="accountName" placeholder="Account Name">
+		  </div>
+		  
+		  <div class="form-group">
+		      <select id="accountType" class="form-control">
+		        <option selected value="card">Card</option>
+		        <option value="cash">Cash</option>
+		        <option value="bank">Bank</option>
+		        <option value="ewallet">E-Wallet</option>
+		      </select>
+		    </div>
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button" id="accountSubmit" class="btn btn-primary">Add</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="categoryAddeddSuccessAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-check-circle  fa-5x" aria-hidden="true" style="color: green;"></i><br>
+    	<h4>Category added successfully!</h4><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="accountAddeddSuccessAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-check-circle  fa-5x" aria-hidden="true" style="color: green;"></i><br>
+    	<h4>Account added successfully!</h4><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+
+<footer th:replace="fragments/footer :: footer"></footer>
+<div th:replace="fragments/jsScripts :: scripts"></div>
+
+</body>
+</html>

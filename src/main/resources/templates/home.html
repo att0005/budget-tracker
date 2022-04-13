@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head">
+</head>
+<script src="https://use.fontawesome.com/c0c323679c.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script>
+
+
+$(document).ready(function(){
+	var incomeGraphData= {};
+var expenseGraphData= {};
+	if(localStorage.getItem("userId") ==="" || localStorage.getItem("userId") === null 
+	|| localStorage.getItem("userId") === undefined){
+		window.location.replace("/");
+	} else {
+		$('#welcomeName').text("Welcome back, "+localStorage.getItem("firstName")+" "+localStorage.getItem("lastName"));
+	}
+	$('#homeDatepicker').datepicker({
+        viewMode: "months", 
+        format: "m-yyyy",
+    	startView: "months", 
+    	changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true,
+        minViewMode: "months",
+        autoclose: true,
+        onClose: function(dateText, inst) { 
+            $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+        }
+    });
+    
+    $('#homeDatepicker').val(((new Date().getMonth())+1)+"-"+new Date().getFullYear())
+    
+   	$('#homeDatepicker').on('change', function(){
+		loadGraph($('#homeDatepicker').val());
+		loadTransactionTableData($('#homeDatepicker').val());
+	});
+    loadCategoryTableData();
+    loadAccountTableData();
+    loadGraph(((new Date().getMonth())+1)+"-"+new Date().getFullYear());
+    loadTransactionTableData(((new Date().getMonth())+1)+"-"+new Date().getFullYear());
+	
+});
+
+function loadTransactionTableData(date) {
+	 var totalIncome = 0;
+		$.ajax({
+		    type:"get",
+		    url:"/transaction/"+localStorage.getItem("userId")+"/"+date,
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var res = JSON.stringify(result);
+				accountList = result;
+				$("#transactionTable").empty();
+				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Date</th><th scope='col'>Amount</th><th scope='col'>Type</th></tr></thead><tbody>";
+				var count = 1;
+				for(var i in accountList) { 
+					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].title+"</b></td><td>"+accountList[i].date+"</td><td><b>$"+accountList[i].amount+"</b></td><td><b>";
+					
+					if(accountList[i].type === 'income'){
+						expenseData=expenseData+"<button type='button' class='btn btn-success'>"+accountList[i].type+"</button>";
+					} else {
+						expenseData=expenseData+"<button type='button' class='btn btn-warning'>"+accountList[i].type+"</button>";
+					}
+					
+					expenseData=expenseData+"</b></td></tr>";
+					count = count+1;
+					totalIncome = totalIncome + accountList[i].amount;
+				}
+				expenseData=expenseData+"</tbody></table>";
+				$("#transactionTable").html(expenseData);
+		    },error: function(err){
+			}
+		});
+  	}
+  	
+  	function loadCategoryTableData() {
+	 var totalIncome = 0;
+		$.ajax({
+		    type:"get",
+		    url:"/category/"+localStorage.getItem("userId"),
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var res = JSON.stringify(result);
+				accountList = result;
+				$("#categoryTable").empty();
+				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Type</th></tr></thead><tbody>";
+				var count = 1;
+				for(var i in accountList) { 
+					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].title+"</b></td><td>"+accountList[i].type+"</td></tr>";
+					count = count+1;
+					totalIncome = totalIncome + accountList[i].amount;
+				}
+				expenseData=expenseData+"</tbody></table>";
+				$("#categoryTable").html(expenseData);
+		    },error: function(err){
+			}
+		});
+  	}
+  	
+  	function loadAccountTableData() {
+		$.ajax({
+		    type:"get",
+		    url:"/account/"+localStorage.getItem("userId"),
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				accountList = result;
+				$("#accountTable").empty();
+				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Type</th></tr></thead><tbody>";
+				var count = 1;
+				for(var i in accountList) { 
+					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].name+"</b></td><td>"+accountList[i].type+"</td></tr>";
+					count = count+1;
+				}
+				expenseData=expenseData+"</tbody></table>";
+				$("#accountTable").html(expenseData);
+		    },error: function(err){
+			}
+		});
+  	}
+
+ function loadGraph(date){
+	$.ajax({
+		    type:"get",
+		    url:"/dashboard/"+localStorage.getItem("userId")+"/"+date,
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var res = JSON.stringify(result);
+				result.incomeDtoList
+				incomeGraphData = result.incomeDtoList;
+				expenseGraphData = result.expenseDtoList;
+				Highcharts.chart('container', {
+					    chart: {
+					        plotBackgroundColor: null,
+					        plotBorderWidth: null,
+					        plotShadow: false,
+					        type: 'pie'
+					    },
+					    title: {
+					        text: 'Income Reports'
+					    },
+					    tooltip: {
+					        pointFormat: '{series.name}: <b>{point.amount:.1f}$</b>'
+					    },
+					    accessibility: {
+					        point: {
+					            valueSuffix: '%'
+					        }
+					    },
+					    plotOptions: {
+					        pie: {
+					            allowPointSelect: true,
+					            cursor: 'pointer',
+					            dataLabels: {
+					                enabled: true,
+					                format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+					            }
+					        }
+					    },
+					    series: [{
+					        name: 'Amount',
+					        colorByPoint: true,
+					        data: incomeGraphData
+					    }]
+					});
+					
+					Highcharts.chart('container1', {
+					    chart: {
+					        plotBackgroundColor: null,
+					        plotBorderWidth: null,
+					        plotShadow: false,
+					        type: 'pie'
+					    },
+					    title: {
+					        text: 'Expense Reports'
+					    },
+					    tooltip: {
+					        pointFormat: '{series.name}: <b>{point.amount:.1f}$</b>'
+					    },
+					    accessibility: {
+					        point: {
+					            valueSuffix: '%'
+					        }
+					    },
+					    plotOptions: {
+					        pie: {
+					            allowPointSelect: true,
+					            cursor: 'pointer',
+					            dataLabels: {
+					                enabled: true,
+					                format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+					            }
+					        }
+					    },
+					    series: [{
+					        name: 'Amount',
+					        colorByPoint: true,
+					        data: expenseGraphData
+					    }]
+					});
+		    },error: function(err){
+			}
+		});
+	}
+
+</script>
+<body>
+
+<!--Navbar-->
+<nav th:replace="fragments/header :: nav"></nav>
+
+<div>
+    <div class="row">
+    <div class="col-1"></div>
+    <div class="col-8 mx-auto"  style="margin-top: 50px;padding:5px;">
+    	<h3 id="welcomeName" style="font-family: cursive;font-size: 40px;"></h3>
+    	<small style="font-family: cursive;">Whats Up!! Here your current month report</small>
+    </div>
+    <div class="col-2 mx-auto" style="width: 20rem; margin-top: 50px;padding:30px;">
+        <div class="form-group">
+		  	<label for="exampleInputEmail1">Select Month</label>
+		      <input class="form-control" data-date-format="mm-yyyy" id="homeDatepicker">
+		    </div>
+    </div>
+     <div class="col-1"></div>
+</div>
+
+
+<div style="padding-bottom:5px;">
+    <div class="row">
+    <div class="col-1"></div>
+    <div class="card col-4 mx-auto" style="width: 20rem; margin-top: 10px;">
+       <figure class="highcharts-figure">
+		    <div id="container"></div>
+		</figure>
+    </div>
+    <div class="col-2"></div>
+    <div class="card col-4 mx-auto" style="width: 20rem; margin-top: 10px;">
+        <figure class="highcharts-figure">
+		    <div id="container1"></div>
+		</figure>
+    </div>
+    <div class="col-1"></div>
+    </div>
+</div>
+
+
+
+<div style="padding-bottom:50px;">
+    <div class="row">
+    <div class="col-1"></div>
+    <div class="card col-10 mx-auto" style="width: 20rem; margin-top: 50px;padding:25px">
+    	<H3>Transactions </H3>
+       	<div id="transactionTable"></div>
+
+    </div>
+    <div class="col-1"></div>
+    </div>
+</div>
+
+<div style="padding-bottom:50px;">
+    <div class="row">
+    <div class="col-1"></div>
+    <div class="card col-4 mx-auto" style="width: 20rem; margin-top: 50px;padding:25px">
+    	<H3>Category </H3>
+       	<div id="categoryTable"></div>
+
+    </div>
+    <div class="col-2"></div>
+    <div class="card col-4 mx-auto" style="width: 20rem; margin-top: 50px;padding:25px">
+    	<H3>Accounts </H3>
+       	<div id="accountTable"></div>
+
+    </div>
+    <div class="col-1"></div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="modal" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="categoryModalLabel">Add Category</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+       	<div class="form-group">
+		    <label for="exampleInputEmail1">Category Name</label>
+		    <input type="text" class="form-control" id="categoryName" placeholder="Category Name">
+		  </div>
+		  
+		  <div class="form-group">
+		    <label for="exampleFormControlTextarea1">Category Description</label>
+		    <textarea class="form-control" id="categoryDesc" rows="3"></textarea>
+		  </div>
+		  <div class="form-group">
+		      <select id="categoryType" class="form-control">
+		        <option selected value="expense">Expense</option>
+		        <option value="income">Income</option>
+		      </select>
+		    </div>
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button" id="categorySubmit" class="btn btn-primary">Add</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal" id="accountModal" tabindex="-1" role="dialog" aria-labelledby="accountModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="accountModalLabel">Add Account</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+       	<div class="form-group">
+		    <label for="exampleInputEmail2">Account Name</label>
+		    <input type="text" class="form-control" id="accountName" placeholder="Account Name">
+		  </div>
+		  
+		  <div class="form-group">
+		      <select id="accountType" class="form-control">
+		        <option selected value="card">Card</option>
+		        <option value="cash">Cash</option>
+		        <option value="bank">Bank</option>
+		        <option value="ewallet">E-Wallet</option>
+		      </select>
+		    </div>
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button" id="accountSubmit" class="btn btn-primary">Add</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="categoryAddeddSuccessAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-check-circle  fa-5x" aria-hidden="true" style="color: green;"></i><br>
+    	<h4>Category added successfully!</h4><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="accountAddeddSuccessAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-check-circle  fa-5x" aria-hidden="true" style="color: green;"></i><br>
+    	<h4>Account added successfully!</h4><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="categoryModalLabel">Add Category</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+       	<div class="form-group">
+		    <label for="exampleInputEmail1">Category Name</label>
+		    <input type="text" class="form-control" id="categoryName" placeholder="Category Name">
+		  </div>
+		  
+		  <div class="form-group">
+		    <label for="exampleFormControlTextarea1">Category Description</label>
+		    <textarea class="form-control" id="categoryDesc" rows="3"></textarea>
+		  </div>
+		  <div class="form-group">
+		      <select id="categoryType" class="form-control">
+		        <option selected value="expense">Expense</option>
+		        <option value="income">Income</option>
+		      </select>
+		    </div>
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button" id="categorySubmit" class="btn btn-primary">Add</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal" id="accountModal" tabindex="-1" role="dialog" aria-labelledby="accountModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="accountModalLabel">Add Account</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+       	<div class="form-group">
+		    <label for="exampleInputEmail2">Account Name</label>
+		    <input type="text" class="form-control" id="accountName" placeholder="Account Name">
+		  </div>
+		  
+		  <div class="form-group">
+		      <select id="accountType" class="form-control">
+		        <option selected value="card">Card</option>
+		        <option value="cash">Cash</option>
+		        <option value="bank">Bank</option>
+		        <option value="ewallet">E-Wallet</option>
+		      </select>
+		    </div>
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button" id="accountSubmit" class="btn btn-primary">Add</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="categoryAddeddSuccessAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-check-circle  fa-5x" aria-hidden="true" style="color: green;"></i><br>
+    	<h4>Category added successfully!</h4><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="accountAddeddSuccessAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-check-circle  fa-5x" aria-hidden="true" style="color: green;"></i><br>
+    	<h4>Account added successfully!</h4><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+<footer th:replace="fragments/footer :: footer"></footer>
+<div th:replace="fragments/jsScripts :: scripts"></div>
+
+</body>
+</html>

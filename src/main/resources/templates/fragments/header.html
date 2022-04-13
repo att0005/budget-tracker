@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head th:replace="fragments/head :: head"></head>
+<script>
+$(document).ready(function(){
+	if(localStorage.getItem("userId") ==="" || localStorage.getItem("userId") === null 
+	|| localStorage.getItem("userId") === undefined){
+		window.location.replace("/");
+	}
+});
+</script>
+<body>
+    <nav th:fragment="nav" id="navbar-home" class="navbar navbar-expand-sm mt-auto fixed-top" style="color:gray !important;z-index: 9999;">
+        <i class="fa fa-university fa-4x" aria-hidden="true" style="color: #6A93F8;"></i>
+        <a class="navbar-brand" th:href="@{/home}" style="color:gray !important" href="/home">
+        &nbsp;&nbsp;&nbsp; BUDGET TRACKER</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" style="color:gray !important" th:href="@{/home}" href="/home">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item ">
+                    <a class="nav-link" style="color:gray !important" th:href="@{/budget}" href="/budget">Budgets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" style="color:gray !important" th:href="@{/income}" href="/income">Income</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" style="color:gray !important"  th:href="@{/expense}" href="/expense">Expenses</a>
+                </li>
+                <!--<li class="nav-item">
+                    <a class="nav-link" style="color:gray !important" href="#">Transactions</a>
+                </li>-->
+            </ul>
+
+
+            <!--region Login and Register menu items-->
+            <!--==========================================================================================-->
+            <ul class="navbar-nav">
+            	<div id="balance"></div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            	<div class="userName" style="display:none">
+            	<div class="d-flex flex-row">
+	                
+	                <li class="nav-item dropdown">
+	                
+					    <a style="color:gray !important" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"><i class="fa fa-user-o fa-1x" aria-hidden="true"></i>&nbsp;&nbsp;<span id="usernameValue"></span></a>
+					    <div class="dropdown-menu dropdown-menu-right">
+					      
+					      <a class="dropdown-item" id="accountModalPanel">
+					      		<i class="fa fa-home fa-fw"></i>&nbsp;Accounts
+					      </a>
+					      <a class="dropdown-item" id="categoryModalPanel" ><i class="fa fa-plus-circle fa-fw"></i>&nbsp;Category</a>
+					      <div class="dropdown-divider"></div>
+					      <a class="dropdown-item" onclick="logoutClick();" href="#"><i class="fa fa-sign-out fa-fw"></i>Logout</a>
+					    </div>
+					  </li>
+	                </div>
+            	</div>
+                <div class="loginButton" style="display:none">
+                	<div class="d-flex flex-row">
+	                <li class="nav-item d-flex flex-row">
+	                    <i class="align-self-center fa fa-user-o " aria-hidden="true" style="color: grey;"></i>
+	                    <a class="nav-link mr-3" style="color:gray !important" th:href="@{/login}" href="/login">Log In</a>
+	                </li>
+	                </div>
+                </div>
+            </ul>
+            <!--==========================================================================================-->
+            <!--endregion-->
+        </div>
+        
+        
+    </nav>
+   
+    
+<div th:replace="fragments/jsScripts :: scripts"></div>
+   
+</body>
+</html>
