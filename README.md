@@ -1,5 +1,15 @@
 # budget-tracker
 
+This is budgeting app. (Describe)
+
+## content 
+User stories 
+Daily progress
+Schema 
+Technical challenages 
+Lesson learn. 
+
+
 ##----Things to implentment-----
 As a user, i would like to transfer my budgets from month to month, so that i do not have to add my budet every month.
 as a user, i would like to have a spending report, so i know what i am spending it on monthly, yearly, quartly. 
