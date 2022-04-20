@@ -61,12 +61,22 @@ private static final Logger logger = LoggerFactory.getLogger(TransactionService.
 		return transactionDao.findAllByUserIdAndTypeOrderByDateAsc(userId, dateFormat);
 	}
 	
-	public List<Transaction> getAllIncomeTransactions(long userId) {
-		return transactionDao.findAllByUserIdAndType(userId, AppContants.INCOME);
+	public List<Transaction> getAllIncomeTransactions(long userId, String date) {
+		String[] split = date.split("-");
+		if(split[0].length()==0) {
+			date= AppContants.ZERO+date;
+		}
+		System.out.println("-date-inc-->"+date);
+		return transactionDao.findAllByUserIdAndType(userId, AppContants.INCOME,date);
 	}
 	
-	public List<Transaction> getAllExpenseTransactions(long userId) {
-		return transactionDao.findAllByUserIdAndType(userId, AppContants.EXPENSE);
+	public List<Transaction> getAllExpenseTransactions(long userId, String date) {
+		String[] split = date.split("-");
+		if(split[0].length()==0) {
+			date= AppContants.ZERO+date;
+		}
+		System.out.println("-date-exp-->"+date);
+		return transactionDao.findAllByUserIdAndType(userId, AppContants.EXPENSE,date);
 	}
 	
 	public DashboardGraphDTO getAllTransaction(long userId, String date) {
@@ -124,5 +134,47 @@ private static final Logger logger = LoggerFactory.getLogger(TransactionService.
 		res.setIncomeDtoList(incomeDtoList);
 		
 		return res;
+	}
+
+	public Transaction updateTransaction(TransactionDTO transactionDto, long transId) {
+		logger.info("update transaction triggered");
+		Optional<User> userOptional = userDao.findById(transactionDto.getUserId());
+		User user = userOptional.isPresent() ? userOptional.get() : userOptional.orElseThrow(DataNotFoundException::new);
+		
+		Optional<Account> accountOptional = accountDao.findById(transactionDto.getAccountId());
+		Account account = accountOptional.isPresent() ? accountOptional.get() : accountOptional.orElseThrow(DataNotFoundException::new);
+		
+		Optional<Category> categoryOptional = categoryDao.findById(transactionDto.getCategoryId());
+		Category category = categoryOptional.isPresent() ? categoryOptional.get() : categoryOptional.orElseThrow(DataNotFoundException::new);
+		
+		Optional<Transaction> transactionOptional = transactionDao.findById(transId);
+		Transaction transactionFromDb = transactionOptional.isPresent() ? transactionOptional.get() : transactionOptional.orElseThrow(DataNotFoundException::new);
+		
+		if(transactionFromDb.getAccount().getId()!=transactionDto.getAccountId()) {
+			transactionFromDb.setAccount(account);
+		}
+		
+		if(transactionFromDb.getCategory().getId()!=transactionDto.getCategoryId()) {
+			transactionFromDb.setCategory(category);
+		}
+		
+		if(Double.compare(transactionFromDb.getAmount(), transactionDto.getAmount()) != 0) {
+			transactionFromDb.setAmount(transactionDto.getAmount());
+		}
+		
+		if(!transactionFromDb.getTitle().equals(transactionDto.getTitle())) {
+			transactionFromDb.setTitle(transactionDto.getTitle());
+		}
+		
+		if(!transactionFromDb.getType().equals(transactionDto.getType())) {
+			transactionFromDb.setType(transactionDto.getType());
+		}
+		
+		logger.info("update transaction completed");
+		return transactionDao.save(transactionFromDb);
+	}
+
+	public void deleteTransactions(long transId) {
+		transactionDao.deleteById(transId);
 	}
 }

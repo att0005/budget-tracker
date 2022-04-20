@@ -89,5 +89,38 @@ public class Transaction {
 		super();
 	}
 
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public void setAccount(Account account) {
+		this.account = account;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setAmount(Double amount) {
+		this.amount = amount;
+	}
+
+	public void setDate(String date) {
+		this.date = date;
+	}
+
+	
 	
 }

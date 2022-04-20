@@ -16,6 +16,9 @@
         	<div th:if="${param.success}">
         	<div class="alert alert-info"> You successfully registered</div>
         	</div>
+        	<div th:if="${param.error}">
+        		<div class="alert alert-info"> Ragistration failed</div>
+        	</div>
             <div class="card-body">
                 <h4 class="card-title">Registration:</h4>
                 <!--Form-->

@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -44,5 +46,18 @@ public class CategoryController {
 	public ResponseEntity<Category> getCategoryById(@PathVariable long userId, @PathVariable long categoryId) {
 		logger.info("Get category by userId and categoryId triggered for the userId : {} and categoryId : {}", userId, categoryId);
 		return ResponseEntity.ok(categoryService.getCategoryById(categoryId));
+	}
+	
+	@PutMapping(value = "/{categoryId}")
+	public ResponseEntity<Category> updateCategory(@RequestBody CategoryDTO categoryDto, @PathVariable long categoryId) {
+		logger.info("Update Category triggered for : {}, with Category Id : {}", categoryDto.getUserId(), categoryId);
+		return ResponseEntity.ok(categoryService.updateCategory(categoryDto, categoryId));
+	}
+	
+	@DeleteMapping(value = "/{categoryId}")
+	public ResponseEntity<String> deleteCategory(@PathVariable long categoryId) {
+		logger.info("Delete category triggered with categoryId : {}",categoryId);
+		categoryService.deleteCategory(categoryId);
+		return ResponseEntity.ok("Successfully deleted");
 	}
 }

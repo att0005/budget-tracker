@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `mobile` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 CREATE TABLE IF NOT EXISTS `category` (
 `id` INT auto_increment,
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `category` (
   `date` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`user_id`) REFERENCES user(`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 CREATE TABLE IF NOT EXISTS `account` (
   `id` INT auto_increment,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `account` (
   `date` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`user_id`) REFERENCES user(`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ;
 
 CREATE TABLE IF NOT EXISTS `transaction` (
   `id` INT auto_increment,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   FOREIGN KEY (`user_id`) REFERENCES user(`id`),
   FOREIGN KEY (`account_id`) REFERENCES account(`id`),
   FOREIGN KEY (`category_id`) REFERENCES category(`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ;
 
 
 CREATE TABLE IF NOT EXISTS `budget` (
@@ -63,5 +63,5 @@ CREATE TABLE IF NOT EXISTS `budget` (
   PRIMARY KEY (`id`),
   FOREIGN KEY (`user_id`) REFERENCES user(`id`),
   FOREIGN KEY (`category_id`) REFERENCES category(`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ;
 

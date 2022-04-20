@@ -7,9 +7,14 @@
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/modules/export-data.js"></script>
 <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/circliful/1.0.2/js/jquery.circliful.min.js"></script>
 <script>
 
-
+var accountData = {};
+var categoryData = {};
+const monthNames = ["january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december"
+];
 $(document).ready(function(){
 	var incomeGraphData= {};
 var expenseGraphData= {};
@@ -36,11 +41,18 @@ var expenseGraphData= {};
     $('#homeDatepicker').val(((new Date().getMonth())+1)+"-"+new Date().getFullYear())
     
    	$('#homeDatepicker').on('change', function(){
+	
+		var monthYear = $('#homeDatepicker').val();
+		var arr = monthYear.split("-");
+		var month = monthNames[arr[0]-1];
+		var year = arr[1];
+		loadBudgetChartData(month+"/"+year);
 		loadGraph($('#homeDatepicker').val());
 		loadTransactionTableData($('#homeDatepicker').val());
 	});
     loadCategoryTableData();
     loadAccountTableData();
+    loadBudgetChartData((monthNames[d.getMonth()]+"/"+new Date().getFullYear()));
     loadGraph(((new Date().getMonth())+1)+"-"+new Date().getFullYear());
     loadTransactionTableData(((new Date().getMonth())+1)+"-"+new Date().getFullYear());
 	
@@ -93,11 +105,12 @@ function loadTransactionTableData(date) {
 		    success: function(result){
 				var res = JSON.stringify(result);
 				accountList = result;
+				categoryData = result;
 				$("#categoryTable").empty();
-				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Type</th></tr></thead><tbody>";
+				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Type</th><th scope='col'>Action</th></tr></thead><tbody>";
 				var count = 1;
 				for(var i in accountList) { 
-					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].title+"</b></td><td>"+accountList[i].type+"</td></tr>";
+					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].title+"</b></td><td>"+accountList[i].type+"</td><td><button  id='updateCategory"+i+"' onclick='updateCategory("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteCategory"+i+"' onclick='deleteCategory("+accountList[i].id+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></td></tr>";
 					count = count+1;
 					totalIncome = totalIncome + accountList[i].amount;
 				}
@@ -118,19 +131,77 @@ function loadTransactionTableData(date) {
 			},
 		    success: function(result){
 				accountList = result;
+				accountData = result;
 				$("#accountTable").empty();
-				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Type</th></tr></thead><tbody>";
+				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Type</th><th scope='col'>Action</th></tr></thead><tbody>";
 				var count = 1;
 				for(var i in accountList) { 
-					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].name+"</b></td><td>"+accountList[i].type+"</td></tr>";
+					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].name+"</b></td><td>"+accountList[i].type+"</td><td><button  id='updateAccount"+i+"' onclick='updateAccount("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteAccount"+i+"' onclick='deleteAccount("+accountList[i].id+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></td></tr>";
 					count = count+1;
 				}
 				expenseData=expenseData+"</tbody></table>";
 				$("#accountTable").html(expenseData);
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
   	}
+  	
+  	function updateAccount(data){
+		$("#accountUId").val(accountData[data].id);
+		$("#accountUName").val(accountData[data].name);
+		$("#accountUType").val(accountData[data].type);
+		$("#accountUpdateModal").modal("show");
+	}
+	
+	function deleteAccount(data){
+		$.ajax({
+		    type:"delete",
+		    url:"/account/"+data,
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    contentType: 'application/json',
+		    success: function(result){
+				$("#successAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:green'>Account deleted successfully</p>");
+				$("#successAlert").modal("show");
+				loadAccountTableData();
+		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
+			
+			}
+		});
+	}
+	
+	function updateCategory(data){
+		$("#categoryUId").val(categoryData[data].id);
+		$("#categoryUName").val(categoryData[data].title);
+		$("#categoryUDesc").val(categoryData[data].description);
+		$("#categoryUType").val(categoryData[data].type);
+		$("#categoryUpdateModal").modal("show");
+	}
+	
+	function deleteCategory(data){
+		$.ajax({
+		    type:"delete",
+		    url:"/category/"+data,
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    contentType: 'application/json',
+		    success: function(result){
+				$("#successAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:green'>Category deleted successfully</p>");
+				$("#successAlert").modal("show");
+				loadCategoryTableData();
+		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
+			
+			}
+		});
+	}
 
  function loadGraph(date){
 	$.ajax({
@@ -153,7 +224,7 @@ function loadTransactionTableData(date) {
 					        type: 'pie'
 					    },
 					    title: {
-					        text: 'Income Reports'
+					        text: 'Overall Income ('+monthNames[$('#homeDatepicker').val().split("-")[0]-1].toUpperCase()+')'
 					    },
 					    tooltip: {
 					        pointFormat: '{series.name}: <b>{point.amount:.1f}$</b>'
@@ -188,7 +259,7 @@ function loadTransactionTableData(date) {
 					        type: 'pie'
 					    },
 					    title: {
-					        text: 'Expense Reports'
+					        text: 'Overall Expense ('+monthNames[$('#homeDatepicker').val().split("-")[0]-1].toUpperCase()+')'
 					    },
 					    tooltip: {
 					        pointFormat: '{series.name}: <b>{point.amount:.1f}$</b>'
@@ -218,7 +289,203 @@ function loadTransactionTableData(date) {
 			}
 		});
 	}
+function loadBudgetChartData(date) {
+	//alert("budget page loadBudgetTableData");
+		//alert("/budget/"+localStorage.getItem("userId")+"/"+date);
+		$.ajax({
+		    type:"get",
+		    url:"/budget/"+localStorage.getItem("userId")+"/"+date,
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var res = JSON.stringify(result);
+				accountList = result;
+				budgetTableData = result;
+				$("#budgetTableData").empty();
+				var expenseData = "";
+				var incomeCategoryChartData = [];
+				var incomeEarnedChartData = [];
+				var incomeBudgetChartData = [];
+				
+				var expenseCategoryChartData = [];
+				var expenseSpentChartData = [];
+				var expenseBudgetChartData = [];
+				for(var i in accountList.budgetTableResponse) { 
+					
+					if(accountList.budgetTableResponse[i].type==='expense'){
+						expenseCategoryChartData.push(accountList.budgetTableResponse[i].categoryName);
+						expenseSpentChartData.push(accountList.budgetTableResponse[i].price);
+						expenseBudgetChartData.push(accountList.budgetTableResponse[i].estimatedPrice);
+					} else {
+						incomeCategoryChartData.push(accountList.budgetTableResponse[i].categoryName);
+						incomeEarnedChartData.push(accountList.budgetTableResponse[i].price);
+						incomeBudgetChartData.push(accountList.budgetTableResponse[i].estimatedPrice);
+					}
+				}
+				
+				Highcharts.chart('incomeBudget', {
 
+				    chart: {
+				        type: 'column'
+				    },
+				
+				    title: {
+				        text: 'Income Budget Report'
+				    },
+				
+				    subtitle: {
+				        text: ''
+				    },
+				
+				    legend: {
+				        align: 'right',
+				        verticalAlign: 'middle',
+				        layout: 'vertical'
+				    },
+				
+				    xAxis: {
+				        categories: incomeCategoryChartData,
+				        labels: {
+				            x: -10
+				        },
+				        title: {
+				            text: 'Category'
+				        }
+				    },
+				
+				    yAxis: {
+				        allowDecimals: false,
+				        title: {
+				            text: 'Amount ($)'
+				        }
+				    },
+				
+				    series: [{
+				        name: 'Income',
+				        color: '#00e600',
+				        data: incomeEarnedChartData
+				    }, {
+				        name: 'Budget',
+				        color: '#434348',
+				        data: incomeBudgetChartData
+				    }],
+				
+				    responsive: {
+				        rules: [{
+				            condition: {
+				                maxWidth: 500
+				            },
+				            chartOptions: {
+				                legend: {
+				                    align: 'center',
+				                    verticalAlign: 'bottom',
+				                    layout: 'horizontal'
+				                },
+				                yAxis: {
+				                    labels: {
+				                        align: 'left',
+				                        x: 0,
+				                        y: -5
+				                    },
+				                    title: {
+				                        text: null
+				                    }
+				                },
+				                subtitle: {
+				                    text: null
+				                },
+				                credits: {
+				                    enabled: false
+				                }
+				            }
+				        }]
+				    }
+				});
+				
+				Highcharts.chart('expenseBudget', {
+
+				    chart: {
+				        type: 'column'
+				    },
+				
+				    title: {
+				        text: 'Expense Budget Report'
+				    },
+				
+				    subtitle: {
+				        text: ''
+				    },
+				
+				    legend: {
+				        align: 'right',
+				        verticalAlign: 'middle',
+				        layout: 'vertical'
+				    },
+				
+				    xAxis: {
+				        categories: expenseCategoryChartData,
+				        labels: {
+				            x: -10
+				        }
+				    },
+				
+				    yAxis: {
+				        allowDecimals: false,
+				        title: {
+				            text: 'Amount ($)'
+				        }
+				    },
+				
+				    series: [{
+				        name: 'Expense',
+				        color: '#cc6600',
+				        data: expenseSpentChartData
+				    }, {
+				        name: 'Budget',
+				        color: '#434348',
+				        data: expenseBudgetChartData
+				    }],
+				
+				    responsive: {
+				        rules: [{
+				            condition: {
+				                maxWidth: 500
+				            },
+				            chartOptions: {
+				                legend: {
+				                    align: 'center',
+				                    verticalAlign: 'bottom',
+				                    layout: 'horizontal'
+				                },
+				                yAxis: {
+				                    labels: {
+				                        align: 'left',
+				                        x: 0,
+				                        y: -5
+				                    },
+				                    title: {
+				                        text: null
+				                    }
+				                },
+				                subtitle: {
+				                    text: null
+				                },
+				                credits: {
+				                    enabled: false
+				                }
+				            }
+				        }]
+				    }
+				});
+
+				
+				
+		    },error: function(err){
+			}
+		});
+  	}
 </script>
 <body>
 
@@ -230,7 +497,7 @@ function loadTransactionTableData(date) {
     <div class="col-1"></div>
     <div class="col-8 mx-auto"  style="margin-top: 50px;padding:5px;">
     	<h3 id="welcomeName" style="font-family: cursive;font-size: 40px;"></h3>
-    	<small style="font-family: cursive;">Whats Up!! Here your current month report</small>
+    	<small style="font-family: cursive;">Here your current month report</small>
     </div>
     <div class="col-2 mx-auto" style="width: 20rem; margin-top: 50px;padding:30px;">
         <div class="form-group">
@@ -241,25 +508,45 @@ function loadTransactionTableData(date) {
      <div class="col-1"></div>
 </div>
 
-
+<div class="card " style="padding:50px; margin:50px">
+	<div style="padding-bottom:5px;">
+	    <div class="row">
+	   
+	    <div class="card col-5 mx-auto" style="width: 20rem; margin-top: 10px;">
+	       <figure class="highcharts-figure">
+			    <div id="incomeBudget"></div>
+			</figure>
+	    </div>
+	    
+	    <div class="card col-5 mx-auto" style="width: 20rem; margin-top: 10px;">
+	        <figure class="highcharts-figure">
+			    <div id="expenseBudget"></div>
+			</figure>
+	    </div>
+	   
+	    </div>
+	</div>
+</div>
+<br></br>
+<div class="card " style="padding:50px; margin:50px">
 <div style="padding-bottom:5px;">
     <div class="row">
-    <div class="col-1"></div>
-    <div class="card col-4 mx-auto" style="width: 20rem; margin-top: 10px;">
+   
+    <div class="card col-5 mx-auto" style="width: 20rem; margin-top: 10px;">
        <figure class="highcharts-figure">
 		    <div id="container"></div>
 		</figure>
     </div>
-    <div class="col-2"></div>
-    <div class="card col-4 mx-auto" style="width: 20rem; margin-top: 10px;">
+   
+    <div class="card col-5 mx-auto" style="width: 20rem; margin-top: 10px;">
         <figure class="highcharts-figure">
 		    <div id="container1"></div>
 		</figure>
     </div>
-    <div class="col-1"></div>
+    
     </div>
 </div>
-
+</div>
 
 
 <div style="padding-bottom:50px;">
@@ -317,6 +604,7 @@ function loadTransactionTableData(date) {
         </button>
       </div>
       <div class="modal-body">
+      
        	<div class="form-group">
 		    <label for="exampleInputEmail1">Category Name</label>
 		    <input type="text" class="form-control" id="categoryName" placeholder="Category Name">
@@ -336,6 +624,46 @@ function loadTransactionTableData(date) {
       <div class="modal-footer">
         
         <button type="button" id="categorySubmit" class="btn btn-primary">Add</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="categoryUpdateModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="categoryModalLabel">Update Category</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      
+      	<div class="form-group" style="display: none;">
+		    <input type="text" class="form-control" id="categoryUId">
+		</div>
+      
+       	<div class="form-group">
+		    <label for="exampleInputEmail1">Category Name</label>
+		    <input type="text" class="form-control" id="categoryUName" placeholder="Category Name">
+		  </div>
+		  
+		  <div class="form-group">
+		    <label for="exampleFormControlTextarea1">Category Description</label>
+		    <textarea class="form-control" id="categoryUDesc" rows="3"></textarea>
+		  </div>
+		  <div class="form-group">
+		      <select id="categoryUType" class="form-control">
+		        <option selected value="expense">Expense</option>
+		        <option value="income">Income</option>
+		      </select>
+		    </div>
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button" id="categoryUpdateSubmit" class="btn btn-primary">Update</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
@@ -370,6 +698,44 @@ function loadTransactionTableData(date) {
       <div class="modal-footer">
         
         <button type="button" id="accountSubmit" class="btn btn-primary">Add</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal" id="accountUpdateModal" tabindex="-1" role="dialog" aria-labelledby="accountModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="accountModalLabel">Update Account</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      
+      	 <div class="form-group" style="display: none;">
+		    <input type="text" class="form-control" id="accountUId">
+		</div>
+       	<div class="form-group">
+		    <label for="exampleInputEmail2">Account Name</label>
+		    <input type="text" class="form-control" id="accountUName" placeholder="Account Name">
+		  </div>
+		  
+		  <div class="form-group">
+		      <select id="accountUType" class="form-control">
+		        <option selected value="card">Card</option>
+		        <option value="cash">Cash</option>
+		        <option value="bank">Bank</option>
+		        <option value="ewallet">E-Wallet</option>
+		      </select>
+		    </div>
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button" id="accountUpdateSubmit" class="btn btn-primary">Update</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
@@ -484,8 +850,39 @@ function loadTransactionTableData(date) {
     </div>
   </div>
 </div>
+
+<div class="modal" id="accountUpdatedSuccessAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-check-circle  fa-5x" aria-hidden="true" style="color: green;"></i><br>
+    	<h4>Account updated successfully!</h4><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="successAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-check-circle  fa-5x" aria-hidden="true" style="color: green;"></i><br>
+    	<span id="successMsg"></span><br><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="errorAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-times-circle  fa-5x" aria-hidden="true" style="color: red;"></i><br>
+    	<span id="errorMsg"></span><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+
 <footer th:replace="fragments/footer :: footer"></footer>
 <div th:replace="fragments/jsScripts :: scripts"></div>
-
+</div>
 </body>
 </html>

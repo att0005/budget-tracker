@@ -12,6 +12,8 @@ public interface CategoryDao extends CrudRepository<Category, Long> {
 	
 	List<Category> findAllByUserId(long userId);
 	
+	Category findByTitle(String title);
+	
 	List<Category> findAllByUserIdAndStatus(long userId, String status);
 	
 }

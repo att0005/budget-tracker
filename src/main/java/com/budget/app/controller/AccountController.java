@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -39,4 +41,19 @@ public class AccountController {
 		logger.info("Get all Accounts triggered for : {}", userId);
 		return ResponseEntity.ok(accountService.getAllAccounts(userId));
 	}
+	
+	@PutMapping(value = "/{accountId}")
+	public ResponseEntity<Account> updateAccount(@RequestBody AccountDTO accountDto, @PathVariable long accountId) {
+		logger.info("Update Account triggered for : {}, with account name : {}", accountDto.getUserId(), accountDto.getName());
+		return ResponseEntity.ok(accountService.updateAccount(accountDto, accountId));
+	}
+	
+	@DeleteMapping(value = "/{accountId}")
+	public ResponseEntity<String> deleteAccount(@PathVariable long accountId) {
+		logger.info("Delete Account triggered with account id : {}",accountId);
+		accountService.deleteAccount(accountId);
+		return ResponseEntity.ok("Successfully deleted");
+	}
+	
+	
 }

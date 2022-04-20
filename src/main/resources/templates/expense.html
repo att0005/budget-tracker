@@ -9,6 +9,105 @@ var accountList = [];
 const monthNames = ["january", "february", "march", "april", "may", "june",
   "july", "august", "september", "october", "november", "december"
 ];
+
+function loadExpenseTableData(date) {
+	//alert("expense page loadExpenseTableData");
+	  var totalExpenses = 0;
+		$.ajax({
+		    type:"get",
+		    url:"/transaction/expense/"+localStorage.getItem("userId")+"/"+date,
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var res = JSON.stringify(result);
+				accountList = result;
+				expenseTransactionData = result;
+				$("#expenseTableData").empty();
+				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Date</th><th scope='col'>Amount</th><th scope='col'>Action</th></tr></thead><tbody>";
+				var count = 1;
+				for(var i in accountList) { 
+					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].title+"</b></td><td>"+accountList[i].date+"</td><td><b> $"+accountList[i].amount+"</b></td><td><button  id='updateTransaction"+i+"' onclick='updateTransaction("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteTransaction"+i+"' onclick='deleteTransaction("+accountList[i].id+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></td></tr>";
+					count = count+1;
+					totalExpenses = totalExpenses + accountList[i].amount;
+				}
+				expenseData=expenseData+"</tbody></table>";
+				$("#expenseTableData").html(expenseData);
+				//$(".totalExpenseSpent").html("$"+totalExpenses);
+				
+		    },error: function(err){
+			}
+		});
+  	}
+  	
+  	var totalSpent = 0;
+	var totalEarn=0;
+	var totalEstiSpent=0;
+	var totalEstiEarn=0;
+	var spentPercentage=0;
+	var earnPercentage=0; 
+  	function loadBudgetTableData(date) {
+		//alert("expense page loadBudgetTableData");
+		$.ajax({
+		    type:"get",
+		    url:"/budget/"+localStorage.getItem("userId")+"/"+date,
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var res = JSON.stringify(result);
+				accountList = result;
+				$("#budgetTableData").empty();
+				var expenseData = "";
+				for(var i in accountList.budgetTableResponse) { 
+					expenseData=expenseData+"<br><br><div class='card' style='background-color:#EEF2FC !important'><div class='card-body'><div class='row'><div class='col-2 mx-auto' style='margin-top:18px'><h4>"+accountList.budgetTableResponse[i].categoryName+"</h4></div><div class='col-2 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price;
+					if(accountList.budgetTableResponse[i].type==='expense'){
+						expenseData=expenseData+"</h4><small style='font-family: cursive;'>spent</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. expense</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div><div class='col-2 mx-auto' style='margin-top:18px'><button  id='updateBudget"+i+"' onclick='updateBudget("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteBudget"+i+"' onclick='deleteBudget("+accountList.budgetTableResponse[i].budgetId+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></div></div></div></div>";
+					} else {
+						expenseData=expenseData+"</h4><small style='font-family: cursive;'>earned</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. income</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div><div class='col-2 mx-auto' style='margin-top:18px'><button  id='updateBudget"+i+"' onclick='updateBudget("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteBudget"+i+"' onclick='deleteBudget("+accountList.budgetTableResponse[i].budgetId+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></div></div></div></div>";
+					}
+				}
+				//totalSpent = accountList.totalSpent;
+				//totalEarn = accountList.totalEarn;
+				//totalEstiSpent = accountList.totalEstiSpent;
+				//totalEstiEarn = accountList.totalEstiEarn;
+				//spentPercentage = accountList.spentPercentage;
+				//earnPercentage = accountList.earnPercentage;
+				totalSpent = isNaN(accountList.totalSpent)?0:accountList.totalSpent;
+				totalEarn = isNaN(accountList.totalEarn)?0:accountList.totalEarn;
+				totalEstiSpent = isNaN(accountList.totalEstiSpent)?0:accountList.totalEstiSpent;
+				totalEstiEarn = isNaN(accountList.totalEstiEarn)?0:accountList.totalEstiEarn;
+				spentPercentage = isNaN(accountList.spentPercentage)?0:accountList.spentPercentage;
+				earnPercentage = isNaN(accountList.earnPercentage)?0:accountList.earnPercentage;
+				
+				$('.totalIncomeSpentPercent').text(earnPercentage+"%");
+				$('.totalExpenseSpentPercent').text(spentPercentage+"%");
+				$('.totalExpenseSpent').text("$"+totalSpent+" out of $"+totalEstiSpent);
+				$('.totalIncomeSpent').text("$"+totalEarn+" out of $"+totalEstiEarn);
+				$("#budgetTableData").html(expenseData);
+
+                $("#progressExpenseCircle").empty();
+				
+			 	 $("#progressExpenseCircle").circliful({
+				    animationStep: 15,
+				    foregroundBorderWidth: 10,
+				    backgroundBorderWidth: 10,
+				    percent: spentPercentage,
+					foregroundColor: 'red'
+				  });
+				
+				
+		    },error: function(err){
+			}
+		});
+  	}
+  function percentageToDegrees(percentage) {
+
+    return percentage / 100 * 360
+
+  }
 $(document).ready(function(){
 	if(localStorage.getItem("userId") ==="" || localStorage.getItem("userId") === null 
 	|| localStorage.getItem("userId") === undefined){
@@ -16,39 +115,38 @@ $(document).ready(function(){
 	} else {
 		$('#welcomeName').text("Welcome back, "+localStorage.getItem("firstName")+" "+localStorage.getItem("lastName"));
 	}
-	loadExpenseTableData();
-	loadBudgetTableData();
+	getCategoryDDData();
 	$('#expenseDatepicker').datepicker({
         viewMode: "months", 
         format: "dd-mm-yyyy",
     	
         autoclose: true
     });
-	
-	$.ajax({
-		    type:"get",
-		    url:"/category/"+localStorage.getItem("userId"),
-		    contentType: 'application/json',
-		    headers: {
-				"Authorization": "Bearer "+localStorage.getItem("token")
-			},
-		    success: function(result){
-				var res = JSON.stringify(result);
-				categoryList = result;
-				$("#selectCategoryData").empty();
-				var categoryData = "<select id='selectedCategory' class='form-control'><option selected value=''>Select Category</option>";
-				for(var i in categoryList) { 
-					if(categoryList[i].type==="expense"){
-						categoryData=categoryData+"<option value="+categoryList[i].id+">"+categoryList[i].title+"</option>";
-					}
-					
-				}
-				categoryData=categoryData+"</select>";
-				$("#selectCategoryData").html(categoryData);
-				
-		    },error: function(err){
-			}
-		});
+    
+    $('#expenseTableDatepicker').datepicker({
+        viewMode: "months", 
+        format: "m-yyyy",
+    	startView: "months", 
+    	changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true,
+        minViewMode: "months",
+        autoclose: true,
+        onClose: function(dateText, inst) { 
+            $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+        }
+    });
+     $('#expenseTableDatepicker').val(((new Date().getMonth())+1)+"-"+new Date().getFullYear())
+     $('#expenseTableDatepicker').on('change', function(){
+		var monthYear = $('#expenseTableDatepicker').val();
+		var arr = monthYear.split("-");
+		var month = monthNames[arr[0]-1];
+		var year = arr[1];
+		loadBudgetTableData(month+"/"+year);
+		loadExpenseTableData($('#expenseTableDatepicker').val());
+	});
+	loadExpenseTableData(((new Date().getMonth())+1)+"-"+new Date().getFullYear());
+	loadBudgetTableData(monthNames[d.getMonth()]+"/"+new Date().getFullYear());
 	
 	$.ajax({
 		    type:"get",
@@ -61,96 +159,189 @@ $(document).ready(function(){
 				var res = JSON.stringify(result);
 				accountList = result;
 				$("#selectAccountData").empty();
+				$("#selectAccountUData").empty();
 				var accountData = "<select id='selectedAccount' class='form-control'><option selected value=''>Select Account</option>";
+				var accountUData = "<select id='selectedUAccount' class='form-control'><option selected value=''>Select Account</option>";
 				for(var i in accountList) { 
 					accountData=accountData+"<option value="+accountList[i].id+">"+accountList[i].name+"</option>";
+					accountUData=accountUData+"<option value="+accountList[i].id+">"+accountList[i].name+"</option>";
 				}
 				accountData=accountData+"</select>";
+				accountUData=accountUData+"</select>";
 				$("#selectAccountData").html(accountData);
+				$("#selectAccountUData").html(accountUData);
 		    },error: function(err){
 			}
 		});
 		
 		
-	var totalSpent = 0;
-	var totalEarn=0;
-	var totalEstiSpent=0;
-	var totalEstiEarn=0;
-	var spentPercentage=0;
-	var earnPercentage=0; 
-  	function loadBudgetTableData() {
+	
+  $("#addExpenseBtn").click(function(){
+	$("#addExpenseModal").modal('toggle');
+	});
+	
+	$("#expenseSubmit").click(function(){
+		var data = {}
+	    data["title"] = $("#expenseName").val();
+	    data["amount"] = $("#expenseAmount").val();
+	    data["categoryId"] = $("#selectedCategory").val();
+	    data["accountId"] = $("#selectedAccount").val();
+	    data["type"] = "expense";
+	    data["userId"] = localStorage.getItem("userId");
+	    data["date"] = $("#expenseDatepicker").val();
+	    if(data["title"]== null || data["title"] == undefined || data["title"] ==""|| data["title"].trim()=="" ||
+		   data["amount"]== null || data["amount"] == undefined || data["amount"] ==""|| data["amount"].trim()=="" ||
+		   data["categoryId"]== null || data["categoryId"] == undefined || data["categoryId"] ==""|| data["categoryId"].trim()=="" ||
+		   data["accountId"]== null || data["accountId"] == undefined || data["accountId"] ==""|| data["accountId"].trim()=="" ||
+	       data["date"]== null || data["date"] == undefined || data["date"] ==""|| data["date"].trim()=="" ||
+	    	data["type"]== null || data["type"] == undefined || data["type"] ==""|| data["type"].trim()==""){
+			$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>Fields Cannot be blank!</p>");
+				$("#errorAlert").modal("show");
+			return false;
+		}
+		$.ajax({
+		    type:"post",
+		    data: JSON.stringify(data),
+		    url:"/transaction",
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var monthYear = $('#expenseTableDatepicker').val();
+				var arr = monthYear.split("-");
+				var month = monthNames[arr[0]-1];
+				var year = arr[1];
+				$("#addExpenseModal").modal('hide');
+				$("#expenseAddeddSuccessAlert").modal("show");
+				$("#expenseName").val("");
+			    $("#expenseAmount").val("");
+			    $("#selectedCategory").val("");
+			    $("#selectedAccount").val("");
+			    $("#expenseDatepicker").val("");
+			    loadBudgetTableData(month+"/"+year);
+				loadExpenseTableData($('#expenseTableDatepicker').val());
+		    },error: function(err){
+			}
+		});
+	});
+	
+	$("#expenseUpdateSubmit").click(function(){
+		var data = {}
+	    data["title"] = $("#expenseUName").val();
+	    data["amount"] = $("#expenseUAmount").val();
+	    data["categoryId"] = $("#selectedUCategory").val();
+	    data["accountId"] = $("#selectedUAccount").val();
+	    data["type"] = "expense";
+	    data["userId"] = localStorage.getItem("userId");
+	    data["date"] = $("#expenseUDatepicker").val();
+	    if(data["title"]== null || data["title"] == undefined || data["title"] ==""|| data["title"].trim()=="" ||
+		   data["amount"]== null || data["amount"] == undefined || data["amount"] ==""|| data["amount"].trim()=="" ||
+		   data["categoryId"]== null || data["categoryId"] == undefined || data["categoryId"] ==""|| data["categoryId"].trim()=="" ||
+		   data["accountId"]== null || data["accountId"] == undefined || data["accountId"] ==""|| data["accountId"].trim()=="" ||
+	       data["date"]== null || data["date"] == undefined || data["date"] ==""|| data["date"].trim()=="" ||
+	    	data["type"]== null || data["type"] == undefined || data["type"] ==""|| data["type"].trim()==""){
+			$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>Fields Cannot be blank!</p>");
+				$("#errorAlert").modal("show");
+			return false;
+		}
+		$.ajax({
+		    type:"put",
+		    data: JSON.stringify(data),
+		    url:"/transaction/"+$("#expenseUId").val(),
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var monthYear = $('#expenseTableDatepicker').val();
+				var arr = monthYear.split("-");
+				var month = monthNames[arr[0]-1];
+				var year = arr[1];
+				$("#updateExpenseModal").modal('hide');
+				$("#successAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:green'>Expense updated successfully</p>");
+				$("#successAlert").modal("show");
+				$("#expenseUName").val("");
+			    $("#expenseUAmount").val("");
+			    $("#selectedUCategory").val("");
+			    $("#selectedUAccount").val("");
+			    $("#expenseUDatepicker").val("");
+			    loadBudgetTableData(month+"/"+year);
+				loadExpenseTableData($('#expenseTableDatepicker').val());
+		    },error: function(err){
+			}
+		});
+	});
+	
+	
+});
+	function updateTransaction(data){
+		$("#expenseUId").val(expenseTransactionData[data].id);
+		$("#expenseUName").val(expenseTransactionData[data].title);
+		$("#expenseUAmount").val(expenseTransactionData[data].amount);
+		$("#selectedUCategory").val(expenseTransactionData[data].category.id);
+		$("#selectedUAccount").val(expenseTransactionData[data].account.id);
+		$("#expenseUDatepicker").val(expenseTransactionData[data].date);
+		$("#updateExpenseModal").modal("show");
+	}
+	
+	function deleteTransaction(data){
+		$.ajax({
+		    type:"delete",
+		    url:"/transaction/"+data,
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    contentType: 'application/json',
+		    success: function(result){
+				var monthYear = $('#expenseTableDatepicker').val();
+				var arr = monthYear.split("-");
+				var month = monthNames[arr[0]-1];
+				var year = arr[1];
+				$("#successAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:green'>Expense deleted successfully</p>");
+				$("#successAlert").modal("show");
+				loadExpenseTableData($('#expenseTableDatepicker').val());
+				loadBudgetTableData(month+"/"+year);
+		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
+			
+			}
+		});
+	}
+	
+	function getCategoryDDData(){
 		$.ajax({
 		    type:"get",
-		    url:"/budget/"+localStorage.getItem("userId")+"/"+monthNames[d.getMonth()]+"/"+new Date().getFullYear(),
+		    url:"/category/"+localStorage.getItem("userId"),
 		    contentType: 'application/json',
 		    headers: {
 				"Authorization": "Bearer "+localStorage.getItem("token")
 			},
 		    success: function(result){
 				var res = JSON.stringify(result);
-				accountList = result;
-				$("#budgetTableData").empty();
-				var expenseData = "";
-				for(var i in accountList.budgetTableResponse) { 
-					expenseData=expenseData+"<br><br><div class='card' style='background-color:#EEF2FC !important'><div class='card-body'><div class='row'><div class='col-3 mx-auto' style='margin-top:18px'><h4>"+accountList.budgetTableResponse[i].categoryName+"</h4></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price;
-					if(accountList.budgetTableResponse[i].type==='expense'){
-						expenseData=expenseData+"</h4><small style='font-family: cursive;'>spent</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. expense</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div></div></div></div>";
-					} else {
-						expenseData=expenseData+"</h4><small style='font-family: cursive;'>earned</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. income</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div></div></div></div>";
+				categoryList = result;
+				$("#selectCategoryData").empty();
+				$("#selectCategoryUData").empty();
+				var categoryData = "<select id='selectedCategory' class='form-control'><option selected value=''>Select Category</option>";
+				var categoryUData = "<select id='selectedUCategory' class='form-control'><option selected value=''>Select Category</option>";
+				for(var i in categoryList) { 
+					if(categoryList[i].type==="expense"){
+						categoryData=categoryData+"<option value="+categoryList[i].id+">"+categoryList[i].title+"</option>";
+						categoryUData=categoryUData+"<option value="+categoryList[i].id+">"+categoryList[i].title+"</option>";
 					}
+					
 				}
-				totalSpent = accountList.totalSpent;
-				totalEarn = accountList.totalEarn;
-				totalEstiSpent = accountList.totalEstiSpent;
-				totalEstiEarn = accountList.totalEstiEarn;
-				spentPercentage = accountList.spentPercentage;
-				earnPercentage = accountList.earnPercentage;
-				
-				$('.totalIncomeSpentPercent').text(earnPercentage+"%");
-				$('.totalExpenseSpentPercent').text(spentPercentage+"%");
-				$('.totalExpenseSpent').text("$"+totalSpent+" out of $"+totalEstiSpent);
-				$('.totalIncomeSpent').text("$"+totalEarn+" out of $"+totalEstiEarn);
-				$('.progressIncomeCircle').attr("data-value", earnPercentage);
-				$('.progressExpenseCircle').attr("data-value", spentPercentage);
-				$("#budgetTableData").html(expenseData);
-				
-			  $(".progressExpenseCircle").each(function() {
-			
-			    var value = spentPercentage;
-			    var left = $(this).find('.progress-left .progress-bar');
-			    var right = $(this).find('.progress-right .progress-bar');
-			
-			    if (value > 0) {
-			      if (value <= 50) {
-			        right.css('transform', 'rotate(' + percentageToDegrees(value) + 'deg)')
-			      } else {
-			        right.css('transform', 'rotate(180deg)')
-			        left.css('transform', 'rotate(' + percentageToDegrees(value - 50) + 'deg)')
-			      }
-			    }
-			
-			  })
-				
-				
+				categoryData=categoryData+"</select>";
+				categoryUData=categoryUData+"</select>";
+				$("#selectCategoryData").html(categoryData);
+				$("#selectCategoryUData").html(categoryUData);
 		    },error: function(err){
 			}
 		});
-  	}
-  
-  
-  function percentageToDegrees(percentage) {
-
-    return percentage / 100 * 360
-
-  }
-  
-  $("#addExpenseBtn").click(function(){
-	$("#addExpenseModal").modal('toggle');
-	});
 	
+	}
 	
-});
-
 </script>
 <body>
 
@@ -168,26 +359,26 @@ $(document).ready(function(){
    </div>
    <div class="row">
     <div class="col-7 mx-auto card"  style="width: 20rem; margin-top: 20px;padding:25px;">
-    <h3>Expense Records</h3>
+    	<div class="row">
+		    <div class="col-10"><h3>Expense Records</h3></div>
+		        <div class="col-2">
+				    <div class="form-group">
+				      <input class="form-control" data-date-format="mm-yyyy" placeholder="Select Month" id="expenseTableDatepicker">
+				    </div>
+				</div>
+    	</div>
 		<div id="expenseTableData"></div>
     </div>
-    <div class="col-4 mx-auto card"  style="width: 20rem; margin-top: 20px;padding:25px;max-height:310px">
+    <div class="col-4 mx-auto card"  style="width: 20rem; margin-top: 20px;padding:25px;max-height:410px">
       <div class="bg-white rounded-lgshadow">
         <h4 class="font-weight-bold text-center">Expense Progress Based on Budget</h4>
 
-        <!-- Progress bar 3 -->
-        <div class="progress mx-auto  p-5 progressExpenseCircle" data-value='79'>
-          <span class="progress-left">
-                        <span class="progress-bar border-success"></span>
-          </span>
-          <span class="progress-right">
-                        <span class="progress-bar border-success"></span>
-          </span>
-          <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
-            <div class="h2 font-weight-bold totalExpenseSpentPercent" ></div><br></br>
-            <small style="font-family: cursive;"> spent</small>
-          </div>
-        </div>
+         <!-- Progress bar 3 -->
+        <div id="circle-container ">
+			  <div id="progressExpenseCircle" style="width:50%; height:50%; margin-left:120px"></div>
+			  <!--<div id="test-circle-time"></div>-->
+			 <!-- <div id="test-circle-extra"></div>-->
+			</div>
         <!-- END -->
 
         <!-- Demo info -->
@@ -252,7 +443,53 @@ $(document).ready(function(){
   </div>
 </div>
 
-
+<div class="modal" id="updateExpenseModal" tabindex="-1" role="dialog" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addExpenseModalLabel">Update Expense</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      
+      	<div class="form-group" style="display: none;">
+		    <input type="text" class="form-control" id="expenseUId">
+		</div>
+          <div class="form-group">
+		    <label for="exampleInputEmail1">Expense Title</label>
+		    <input type="text" class="form-control" id="expenseUName" placeholder="Expense Name">
+		  </div>
+		  
+		  <div class="form-group">
+		    <label for="exampleInputEmail1">Amount ($)</label>
+		    <input type="text" class="form-control" id="expenseUAmount" placeholder="Amount">
+		  </div>
+		  
+		  <div class="form-group">
+		  	<label for="exampleInputEmail1">Select Category</label>
+		      <div id="selectCategoryUData"></div>
+		    </div>
+		    
+		    <div class="form-group">
+		    <label for="exampleInputEmail1">Select Account</label>
+		      <div id="selectAccountUData"></div>
+		    </div>
+		    
+		    <div class="form-group">
+		  	<label for="exampleInputEmail1">Select Date</label>
+		      <input class="form-control" data-date-format="dd-mm-yyyy" id="expenseUDatepicker">
+		    </div>
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button"  id="expenseUpdateSubmit"  class="btn btn-primary">Update</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
@@ -360,8 +597,24 @@ $(document).ready(function(){
     </div>
   </div>
 </div>
-
-
+<div class="modal" id="errorAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-times-circle  fa-5x" aria-hidden="true" style="color: red;"></i><br>
+    	<span id="errorMsg"></span><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="successAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-check-circle  fa-5x" aria-hidden="true" style="color: green;"></i><br>
+    	<span id="successMsg"></span><br><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
 
 
 

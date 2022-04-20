@@ -83,6 +83,31 @@ public class Category {
 		super();
 	}
 
-	
+	public void setId(long id) {
+		this.id = id;
+	}
 
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
 }

@@ -9,6 +9,105 @@ var accountList = [];
 const monthNames = ["january", "february", "march", "april", "may", "june",
   "july", "august", "september", "october", "november", "december"
 ];
+
+
+var totalSpent = 0;
+	var totalEarn=0;
+	var totalEstiSpent=0;
+	var totalEstiEarn=0;
+	var spentPercentage=0;
+	var earnPercentage=0; 
+  	function loadBudgetTableData(date) {
+		//alert("income page loadBudgetTableData");
+		$.ajax({
+		    type:"get",
+		    url:"/budget/"+localStorage.getItem("userId")+"/"+date,
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var res = JSON.stringify(result);
+				accountList = result;
+				$("#budgetTableData").empty();
+				var expenseData = "";
+				for(var i in accountList.budgetTableResponse) { 
+					expenseData=expenseData+"<br><br><div class='card' style='background-color:#EEF2FC !important'><div class='card-body'><div class='row'><div class='col-2 mx-auto' style='margin-top:18px'><h4>"+accountList.budgetTableResponse[i].categoryName+"</h4></div><div class='col-2 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price;
+					if(accountList.budgetTableResponse[i].type==='expense'){
+						expenseData=expenseData+"</h4><small style='font-family: cursive;'>spent</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. expense</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div><div class='col-2 mx-auto' style='margin-top:18px'><button  id='updateBudget"+i+"' onclick='updateBudget("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteBudget"+i+"' onclick='deleteBudget("+accountList.budgetTableResponse[i].budgetId+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></div></div></div></div>";
+					} else {
+						expenseData=expenseData+"</h4><small style='font-family: cursive;'>earned</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. income</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div><div class='col-2 mx-auto' style='margin-top:18px'><button  id='updateBudget"+i+"' onclick='updateBudget("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteBudget"+i+"' onclick='deleteBudget("+accountList.budgetTableResponse[i].budgetId+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></div></div></div></div>";
+					}
+				}
+				//totalSpent = accountList.totalSpent;
+				//totalEarn = accountList.totalEarn;
+				//totalEstiSpent = accountList.totalEstiSpent;
+				//totalEstiEarn = accountList.totalEstiEarn;
+				//spentPercentage = accountList.spentPercentage;
+				//earnPercentage = accountList.earnPercentage;
+				totalSpent = isNaN(accountList.totalSpent)?0:accountList.totalSpent;
+				totalEarn = isNaN(accountList.totalEarn)?0:accountList.totalEarn;
+				totalEstiSpent = isNaN(accountList.totalEstiSpent)?0:accountList.totalEstiSpent;
+				totalEstiEarn = isNaN(accountList.totalEstiEarn)?0:accountList.totalEstiEarn;
+				spentPercentage = isNaN(accountList.spentPercentage)?0:accountList.spentPercentage;
+				earnPercentage = isNaN(accountList.earnPercentage)?0:accountList.earnPercentage;
+				
+				$('.totalIncomeSpentPercent').text(earnPercentage+"%");
+				$('.totalExpenseSpentPercent').text(spentPercentage+"%");
+				$('.totalExpenseSpent').text("$"+totalSpent+" out of $"+totalEstiSpent);
+				$('.totalIncomeSpent').text("$"+totalEarn+" out of $"+totalEstiEarn);
+				$("#budgetTableData").html(expenseData);
+
+                $("#progressIncomeCircle").empty();
+				
+				$("#progressIncomeCircle").circliful({
+				   animationStep: 15,
+				    foregroundBorderWidth: 10,
+				    backgroundBorderWidth: 10,
+				    percent: earnPercentage,
+					foregroundColor: 'green'
+				  });				
+		    },error: function(err){
+			}
+		});
+  	}
+  	
+  	function loadIncomeTableData(date) {
+	//alert("income page loadIncomeTableData"+date);
+	//alert("/transaction/income/"+localStorage.getItem("userId")+"/"+date);
+	 var totalIncome = 0;
+		$.ajax({
+		    type:"get",
+		    url:"/transaction/income/"+localStorage.getItem("userId")+"/"+date,
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var res = JSON.stringify(result);
+				accountList = result;
+				incomeTransactionData = result;
+				$("#incomeTableData").empty();
+				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Date</th><th scope='col'>Amount</th><th scope='col'>Action</th></tr></thead><tbody>";
+				var count = 1;
+				for(var i in accountList) { 
+					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].title+"</b></td><td>"+accountList[i].date+"</td><td><b>$"+accountList[i].amount+"</b></td><td><button  id='updateTransaction"+i+"' onclick='updateTransaction("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteTransaction"+i+"' onclick='deleteTransaction("+accountList[i].id+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></td></tr>";
+					count = count+1;
+					totalIncome = totalIncome + accountList[i].amount;
+				}
+				expenseData=expenseData+"</tbody></table>";
+				$("#incomeTableData").html(expenseData);
+				$(".totalIncomeEarned").html("$"+totalIncome);
+		    },error: function(err){
+			}
+		});
+  	}
+  	
+  	function percentageToDegrees(percentage) {
+
+    return percentage / 100 * 360
+
+  }
 $(document).ready(function(){
 	if(localStorage.getItem("userId") ==="" || localStorage.getItem("userId") === null 
 	|| localStorage.getItem("userId") === undefined){
@@ -16,15 +115,39 @@ $(document).ready(function(){
 	} else {
 		$('#welcomeName').text("Welcome back, "+localStorage.getItem("firstName")+" "+localStorage.getItem("lastName"));
 	}
-	loadIncomeTableData();
-	loadBudgetTableData();
+	
 	$('#incomeDatepicker').datepicker({
         viewMode: "months", 
         format: "dd-mm-yyyy",
     	
         autoclose: true
     });
-	
+    
+	$('#incomeTableDatepicker').datepicker({
+        viewMode: "months", 
+        format: "m-yyyy",
+    	startView: "months", 
+    	changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true,
+        minViewMode: "months",
+        autoclose: true,
+        onClose: function(dateText, inst) { 
+            $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+        }
+    });
+     $('#incomeTableDatepicker').val(((new Date().getMonth())+1)+"-"+new Date().getFullYear())
+     $('#incomeTableDatepicker').on('change', function(){
+	//alert('change---'+$('#budgetDatepicker').val());
+		var monthYear = $('#incomeTableDatepicker').val();
+		var arr = monthYear.split("-");
+		var month = monthNames[arr[0]-1];
+		var year = arr[1];
+		loadBudgetTableData(month+"/"+year);
+		loadIncomeTableData($('#incomeTableDatepicker').val());
+	});
+	loadIncomeTableData(((new Date().getMonth())+1)+"-"+new Date().getFullYear());
+	loadBudgetTableData(monthNames[d.getMonth()]+"/"+new Date().getFullYear());
 	$.ajax({
 		    type:"get",
 		    url:"/category/"+localStorage.getItem("userId"),
@@ -36,15 +159,19 @@ $(document).ready(function(){
 				var res = JSON.stringify(result);
 				categoryList = result;
 				$("#selectCategoryData").empty();
+				$("#selectCategoryIData").empty();
 				var categoryData = "<select id='selectedCategory' class='form-control'><option selected value=''>Select Category</option>";
+				var categoryUData = "<select id='selectedUCategory' class='form-control'><option selected value=''>Select Category</option>";
 				for(var i in categoryList) { 
 					if(categoryList[i].type==="income"){
 					categoryData=categoryData+"<option value="+categoryList[i].id+">"+categoryList[i].title+"</option>";
+					categoryUData=categoryUData+"<option value="+categoryList[i].id+">"+categoryList[i].title+"</option>";
 					}
 				}
 				categoryData=categoryData+"</select>";
+				categoryUData=categoryUData+"</select>";
 				$("#selectCategoryData").html(categoryData);
-				
+				$("#selectCategoryIData").html(categoryUData);
 		    },error: function(err){
 			}
 		});
@@ -60,80 +187,23 @@ $(document).ready(function(){
 				var res = JSON.stringify(result);
 				accountList = result;
 				$("#selectAccountData").empty();
+				$("#selectAccountIData").empty();
 				var accountData = "<select id='selectedAccount' class='form-control'><option selected value=''>Select Account</option>";
+				var accountUData = "<select id='selectedUAccount' class='form-control'><option selected value=''>Select Account</option>";
 				for(var i in accountList) { 
 					accountData=accountData+"<option value="+accountList[i].id+">"+accountList[i].name+"</option>";
+					accountUData=accountUData+"<option value="+accountList[i].id+">"+accountList[i].name+"</option>";
 				}
 				accountData=accountData+"</select>";
+				accountUData=accountUData+"</select>";
 				$("#selectAccountData").html(accountData);
+				$("#selectAccountIData").html(accountUData);
 		    },error: function(err){
 			}
 		});
 		
 		
-	var totalSpent = 0;
-	var totalEarn=0;
-	var totalEstiSpent=0;
-	var totalEstiEarn=0;
-	var spentPercentage=0;
-	var earnPercentage=0; 
-  	function loadBudgetTableData() {
-		$.ajax({
-		    type:"get",
-		    url:"/budget/"+localStorage.getItem("userId")+"/"+monthNames[d.getMonth()]+"/"+new Date().getFullYear(),
-		    contentType: 'application/json',
-		    headers: {
-				"Authorization": "Bearer "+localStorage.getItem("token")
-			},
-		    success: function(result){
-				var res = JSON.stringify(result);
-				accountList = result;
-				$("#budgetTableData").empty();
-				var expenseData = "";
-				for(var i in accountList.budgetTableResponse) { 
-					expenseData=expenseData+"<br><br><div class='card' style='background-color:#EEF2FC !important'><div class='card-body'><div class='row'><div class='col-3 mx-auto' style='margin-top:18px'><h4>"+accountList.budgetTableResponse[i].categoryName+"</h4></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price;
-					if(accountList.budgetTableResponse[i].type==='expense'){
-						expenseData=expenseData+"</h4><small style='font-family: cursive;'>spent</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. expense</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div></div></div></div>";
-					} else {
-						expenseData=expenseData+"</h4><small style='font-family: cursive;'>earned</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. income</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div></div></div></div>";
-					}
-				}
-				totalSpent = accountList.totalSpent;
-				totalEarn = accountList.totalEarn;
-				totalEstiSpent = accountList.totalEstiSpent;
-				totalEstiEarn = accountList.totalEstiEarn;
-				spentPercentage = accountList.spentPercentage;
-				earnPercentage = accountList.earnPercentage;
-				
-				$('.totalIncomeSpentPercent').text(earnPercentage+"%");
-				$('.totalExpenseSpentPercent').text(spentPercentage+"%");
-				$('.totalExpenseSpent').text("$"+totalSpent+" out of $"+totalEstiSpent);
-				$('.totalIncomeSpent').text("$"+totalEarn+" out of $"+totalEstiEarn);
-				$('.progressIncomeCircle').attr("data-value", earnPercentage);
-				$('.progressExpenseCircle').attr("data-value", spentPercentage);
-				$("#budgetTableData").html(expenseData);
-				
-			  $(".progressIncomeCircle").each(function() {
-			    var value = earnPercentage;
-			    var left = $(this).find('.progress-left .progress-bar');
-			    var right = $(this).find('.progress-right .progress-bar');
-			
-			    if (value > 0) {
-			      if (value <= 50) {
-			        right.css('transform', 'rotate(' + percentageToDegrees(value) + 'deg)')
-			      } else {
-			        right.css('transform', 'rotate(180deg)')
-			        left.css('transform', 'rotate(' + percentageToDegrees(value - 50) + 'deg)')
-			      }
-			    }
-			
-			  })
-				
-				
-		    },error: function(err){
-			}
-		});
-  	}
+	
   
   function percentageToDegrees(percentage) {
 
@@ -146,7 +216,138 @@ $(document).ready(function(){
 	});
 	
 	
+	$("#incomeSubmit").click(function(){
+		var data = {}
+	    data["title"] = $("#incomeName").val();
+	    data["amount"] = $("#incomeAmount").val();
+	    data["categoryId"] = $("#selectedCategory").val();
+	    data["accountId"] = $("#selectedAccount").val();
+	    data["type"] = "income";
+	    data["userId"] = localStorage.getItem("userId");
+	    data["date"] = $("#incomeDatepicker").val();
+	    if(data["title"]== null || data["title"] == undefined || data["title"] ==""|| data["title"].trim()=="" ||
+		   data["amount"]== null || data["amount"] == undefined || data["amount"] ==""|| data["amount"].trim()=="" ||
+		   data["categoryId"]== null || data["categoryId"] == undefined || data["categoryId"] ==""|| data["categoryId"].trim()=="" ||
+		   data["accountId"]== null || data["accountId"] == undefined || data["accountId"] ==""|| data["accountId"].trim()=="" ||
+	       data["date"]== null || data["date"] == undefined || data["date"] ==""|| data["date"].trim()=="" ||
+	    	data["type"]== null || data["type"] == undefined || data["type"] ==""|| data["type"].trim()==""){
+			$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>Fields Cannot be blank!</p>");
+				$("#errorAlert").modal("show");
+			return false;
+		}
+		$.ajax({
+		    type:"post",
+		    data: JSON.stringify(data),
+		    url:"/transaction",
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var monthYear = $('#incomeTableDatepicker').val();
+				var arr = monthYear.split("-");
+				var month = monthNames[arr[0]-1];
+				var year = arr[1];
+				$("#addIncomeModal").modal('hide');
+				$("#successAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:green'>Income updated successfully</p>");
+				$("#successAlert").modal("show");
+				$("#incomeUName").val("");
+			    $("#incomeUAmount").val("");
+			    $("#selectedUCategory").val("");
+			    $("#selectedUAccount").val("");
+			    $("#incomeUDatepicker").val("");
+			    loadIncomeTableData($('#incomeTableDatepicker').val());
+			    loadBudgetTableData(month+"/"+year);
+		    },error: function(err){
+			}
+		});
+	});
+	
+	
+	$("#incomeUpdateSubmit").click(function(){
+		var data = {}
+	    data["title"] = $("#incomeUName").val();
+	    data["amount"] = $("#incomeUAmount").val();
+	    data["categoryId"] = $("#selectedUCategory").val();
+	    data["accountId"] = $("#selectedUAccount").val();
+	    data["type"] = "income";
+	    data["userId"] = localStorage.getItem("userId");
+	    data["date"] = $("#incomeUDatepicker").val();
+	    if(data["title"]== null || data["title"] == undefined || data["title"] ==""|| data["title"].trim()=="" ||
+		   data["amount"]== null || data["amount"] == undefined || data["amount"] ==""|| data["amount"].trim()=="" ||
+		   data["categoryId"]== null || data["categoryId"] == undefined || data["categoryId"] ==""|| data["categoryId"].trim()=="" ||
+		   data["accountId"]== null || data["accountId"] == undefined || data["accountId"] ==""|| data["accountId"].trim()=="" ||
+	       data["date"]== null || data["date"] == undefined || data["date"] ==""|| data["date"].trim()=="" ||
+	    	data["type"]== null || data["type"] == undefined || data["type"] ==""|| data["type"].trim()==""){
+			$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>Fields Cannot be blank!</p>");
+				$("#errorAlert").modal("show");
+			return false;
+		}
+		$.ajax({
+		    type:"put",
+		    data: JSON.stringify(data),
+		    url:"/transaction/"+$("#incomeUId").val(),
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				var monthYear = $('#incomeTableDatepicker').val();
+				var arr = monthYear.split("-");
+				var month = monthNames[arr[0]-1];
+				var year = arr[1];
+				$("#updateIncomeModal").modal('hide');
+				$("#incomeAddeddSuccessAlert").modal("show");
+				$("#incomeName").val("");
+			    $("#incomeAmount").val("");
+			    $("#selectedCategory").val("");
+			    $("#selectedAccount").val("");
+			    $("#incomeDatepicker").val("");
+			    loadIncomeTableData($('#incomeTableDatepicker').val());
+			    loadBudgetTableData(month+"/"+year);
+		    },error: function(err){
+			}
+		});
+	});
+
+	
+	
 });
+
+function updateTransaction(data){
+		$("#incomeUId").val(incomeTransactionData[data].id);
+		$("#incomeUName").val(incomeTransactionData[data].title);
+		$("#incomeUAmount").val(incomeTransactionData[data].amount);
+		$("#selectedUCategory").val(incomeTransactionData[data].category.id);
+		$("#selectedUAccount").val(incomeTransactionData[data].account.id);
+		$("#incomeUDatepicker").val(incomeTransactionData[data].date);
+		$("#updateIncomeModal").modal("show");
+	}
+	
+	function deleteTransaction(data){
+		$.ajax({
+		    type:"delete",
+		    url:"/transaction/"+data,
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    contentType: 'application/json',
+		    success: function(result){
+				var monthYear = $('#incomeTableDatepicker').val();
+				var arr = monthYear.split("-");
+				var month = monthNames[arr[0]-1];
+				var year = arr[1];
+				$("#successAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:green'>Income deleted successfully</p>");
+				$("#successAlert").modal("show");
+				loadIncomeTableData($('#incomeTableDatepicker').val());
+				loadBudgetTableData(month+"/"+year);
+		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
+			
+			}
+		});
+	}
 
 </script>
 <body>
@@ -166,27 +367,25 @@ $(document).ready(function(){
    </div>
    <div class="row">
     <div class="col-7 mx-auto card"  style="width: 20rem; margin-top: 20px;padding:25px;">
-    <h3>Income Records</h3>
+   		 <div class="row">
+		    <div class="col-10"><h3>Income Records</h3></div>
+		        <div class="col-2">
+				    <div class="form-group">
+				      <input class="form-control" data-date-format="mm-yyyy" placeholder="Select Month" id="incomeTableDatepicker">
+				    </div>
+				</div>
+    	</div>
 		<div id="incomeTableData"></div>
     </div>
-    <div class="col-4 mx-auto card"  style="width: 20rem; margin-top: 20px;padding:25px;max-height:310px">
+    <div class="col-4 mx-auto card"  style="width: 20rem; margin-top: 20px;padding:25px;max-height:410px">
       <div class="bg-white rounded-lgshadow">
         <h4 class="font-weight-bold text-center">Income Progress Based on Budget</h4>
 
-        <!-- Progress bar 3 -->
-        <div class="progress mx-auto  p-5 progressIncomeCircle" data-value='10'>
-          <span class="progress-left">
-                        <span class="progress-bar border-success"></span>
-          </span>
-          <span class="progress-right">
-                        <span class="progress-bar border-success"></span>
-          </span>
-          <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
-            <div class="h2 font-weight-bold totalIncomeSpentPercent" ></div><br></br>
-            <small style="font-family: cursive;"> earned</small>
-          </div>
-        </div>
-        <!-- END -->
+       <div id="circle-container ">
+			  <div id="progressIncomeCircle" style="width:50%; height:50%; margin-left:120px"></div>
+			  <!--<div id="test-circle-time"></div>-->
+			 <!-- <div id="test-circle-extra"></div>-->
+			</div>
 
         <!-- Demo info -->
         <div class="row text-center mt-4">
@@ -249,7 +448,54 @@ $(document).ready(function(){
   </div>
 </div>
 
-
+<div class="modal" id="updateIncomeModal" tabindex="-1" role="dialog" aria-labelledby="addIncomeModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addIncomeModalLabel">Update Income</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <div class="form-group">
+          
+          <div class="form-group" style="display: none;">
+		    <input type="text" class="form-control" id="incomeUId">
+		</div>
+          
+		    <label for="exampleInputEmail1">Income Title</label>
+		    <input type="text" class="form-control" id="incomeUName" placeholder="Income Name">
+		  </div>
+		  
+		  <div class="form-group">
+		    <label for="exampleInputEmail1">Amount ($)</label>
+		    <input type="text" class="form-control" id="incomeUAmount" placeholder="Amount">
+		  </div>
+		  
+		  <div class="form-group">
+		  	<label for="exampleInputEmail1">Select Category</label>
+		      <div id="selectCategoryIData"></div>
+		    </div>
+		    
+		    <div class="form-group">
+		    <label for="exampleInputEmail1">Select Account</label>
+		      <div id="selectAccountIData"></div>
+		    </div>
+		    
+		    <div class="form-group">
+		  	<label for="exampleInputEmail1">Select Date</label>
+		      <input class="form-control" data-date-format="dd-mm-yyyy" id="incomeUDatepicker">
+		    </div>
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button"  id="incomeUpdateSubmit"  class="btn btn-primary">Update</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 <div class="modal" id="incomeAddeddSuccessAlert" role="dialog" aria-labelledby="successAlertLabel">
@@ -352,6 +598,26 @@ $(document).ready(function(){
     </div>
   </div>
 </div>
+
+<div class="modal" id="successAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-check-circle  fa-5x" aria-hidden="true" style="color: green;"></i><br>
+    	<span id="successMsg"></span><br><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="errorAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-times-circle  fa-5x" aria-hidden="true" style="color: red;"></i><br>
+    	<span id="errorMsg"></span><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
+</div>
+
 
 <footer th:replace="fragments/footer :: footer"></footer>
 <div th:replace="fragments/jsScripts :: scripts"></div>

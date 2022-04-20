@@ -48,10 +48,22 @@ private static final Logger logger = LoggerFactory.getLogger(BudgetService.class
 		Optional<Category> categoryOptional = categoryDao.findById(budgetDto.getCategoryId());
 		Category category = categoryOptional.isPresent() ? categoryOptional.get() : categoryOptional.orElseThrow(DataNotFoundException::new);
 		logger.info("save budget for user : {}, with category : {}", user.getUsername(), category.getTitle());
-		Budget budget = new Budget(user, category,budgetDto.getEstimatedExpense(),
-				budgetDto.getEstimatedIncome(), budgetDto.getMonth(), budgetDto.getYear());
-		logger.info("Save budget completed for user : {}", user.getUsername());
-		return budgetDao.save(budget);
+		
+		Budget budgetFromDB = budgetDao.findAllByUserIdAndCategoryIdAndMonthAndYear(budgetDto.getUserId(), budgetDto.getCategoryId(), budgetDto.getMonth(), budgetDto.getYear());
+		
+		if(budgetFromDB == null) {
+			Budget budget = new Budget(user, category,budgetDto.getEstimatedExpense(),
+					budgetDto.getEstimatedIncome(), budgetDto.getMonth(), budgetDto.getYear());
+			logger.info("Save budget completed for user : {}", user.getUsername());
+			return budgetDao.save(budget);
+		} else {
+			//budgetDto.get
+			if(budgetDto.getEstimatedExpense() != null)
+				budgetFromDB.setEstimatedExpense(Double.sum(budgetDto.getEstimatedExpense(), budgetFromDB.getEstimatedExpense()));
+			if(budgetDto.getEstimatedIncome() != null)
+				budgetFromDB.setEstimatedIncome(Double.sum(budgetDto.getEstimatedIncome(), budgetFromDB.getEstimatedIncome()));
+			return budgetDao.save(budgetFromDB);
+		}
 	}
 	
 	
@@ -84,9 +96,12 @@ private static final Logger logger = LoggerFactory.getLogger(BudgetService.class
 				dto.setType(AppContants.EXPENSE);
 				dto.setEstimatedPrice(each.getEstimatedExpense());
 			}
-			
+			dto.setBudgetId(each.getId());
+			dto.setUserId(each.getUser().getId());
+			dto.setCategoryId(each.getCategory().getId());
 			dto.setCategoryName(each.getCategory().getTitle());
-			
+			dto.setMonth(each.getMonth());
+			dto.setYear(each.getYear());
 			arrList.add(dto);
 		});
 		
@@ -119,5 +134,48 @@ private static final Logger logger = LoggerFactory.getLogger(BudgetService.class
 		logger.info("Get all budgets completed");
 		return res;
 	}
+
+
+
+	public Budget updateBudget(BudgetDTO budgetDto, long budgetId) {
+		logger.info("Update budget triggered");
+		Optional<User> userOptional = userDao.findById(budgetDto.getUserId());
+		User user = userOptional.isPresent() ? userOptional.get() : userOptional.orElseThrow(DataNotFoundException::new);
+		Optional<Category> categoryOptional = categoryDao.findById(budgetDto.getCategoryId());
+		Category category = categoryOptional.isPresent() ? categoryOptional.get() : categoryOptional.orElseThrow(DataNotFoundException::new);
+		Optional<Budget> budgetOptional = budgetDao.findById(budgetId);
+		Budget budgetFromDB = budgetOptional.isPresent() ? budgetOptional.get() : budgetOptional.orElseThrow(DataNotFoundException::new);
+		
+		logger.info("Update budget for user : {}, with category : {}", user.getUsername(), category.getTitle());
+		
+		if(budgetFromDB.getCategory().getId() != budgetDto.getCategoryId()) {
+			budgetFromDB.setCategory(category);
+		} 
+		
+		if(!budgetFromDB.getMonth().equals(budgetDto.getMonth())) {
+			budgetFromDB.setMonth(budgetDto.getMonth());
+		} 
+		
+		if(!budgetFromDB.getYear().equals(budgetDto.getYear())) {
+			budgetFromDB.setYear(budgetDto.getYear());
+		} 
+		
+		if(budgetDto.getEstimatedExpense() != null) {
+			budgetFromDB.setEstimatedExpense(budgetDto.getEstimatedExpense());
+			budgetFromDB.setEstimatedIncome(null);
+		}
+		if(budgetDto.getEstimatedIncome() != null) {
+			budgetFromDB.setEstimatedIncome(budgetDto.getEstimatedIncome());
+			budgetFromDB.setEstimatedExpense(null);
+		}
+		
+		return budgetDao.save(budgetFromDB);
+	}
+
+	public void deleteBudget(long budgetId) {
+		budgetDao.deleteById(budgetId);
+	}
+	
+	
 
 }

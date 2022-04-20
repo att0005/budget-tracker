@@ -11,5 +11,7 @@ import com.budget.app.entity.Budget;
 public interface BudgetDao extends CrudRepository<Budget, Long> {
 	
 	List<Budget> findAllByUserIdAndMonthAndYear(long userId, String month, String year);
+	
+	Budget findAllByUserIdAndCategoryIdAndMonthAndYear(long userId, long categoryId, String month, String year);
 
 }

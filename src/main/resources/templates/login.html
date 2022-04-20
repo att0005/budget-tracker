@@ -24,6 +24,12 @@ function loginClick(){
 	var data = {}
     data["username"] = $("#username").val();
     data["password"] = $("#password").val();
+    if(data["username"]== null || data["username"] == undefined || data["username"] ==""|| data["username"].trim()=="" ||
+	    	data["password"]== null || data["password"] == undefined || data["password"] ==""|| data["password"].trim()==""){
+			$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>Fields Cannot be blank!</p>");
+				$("#errorAlert").modal("show");
+			return false;
+		}
 	$.ajax({
 	    type:"post",
 	    data: JSON.stringify(data),
@@ -78,6 +84,16 @@ function loginClick(){
             </div>
         </div>
     </div>
+</div>
+
+<div class="modal" id="errorAlert" role="dialog" aria-labelledby="successAlertLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="text-align: center;padding:50px">
+    	<i class="fa fa-times-circle  fa-5x" aria-hidden="true" style="color: red;"></i><br>
+    	<span id="errorMsg"></span><br>
+      	<button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+    </div>
+  </div>
 </div>
 <span> '[[${#httpServletRequest.remoteUser}]]' </span>
 <footer th:replace="fragments/footer :: footer"></footer>

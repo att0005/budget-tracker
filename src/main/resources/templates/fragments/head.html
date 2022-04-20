@@ -15,7 +15,8 @@
 
     <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.css"/>
 
-
+ <link th:rel="stylesheet" rel="stylesheet" type="text/css" th:href="@{/css/style.css}"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/circliful/2.0.17/circliful.min.js" integrity="sha512-Civ+P0HbDg/IxddLsDIPVrX9KLoscRKlZ1QIkDJS4077COoK3hFxAxIuyZUNR9NT29qB3Tx9WXQ1OxQzl5i+IA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link th:rel="stylesheet" rel="stylesheet" type="text/css" th:href="@{/css/style.css}"/>
    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
@@ -24,11 +25,14 @@
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/circliful/1.0.2/js/jquery.circliful.min.js"></script>
   <script>
  
-
+expenseTransactionData={};
+incomeTransactionData={};
+budgetTableData={};
   function loadExpenseTableData() {
+	//alert("head page loadIncomeTableData");
 	  var totalExpenses = 0;
 		$.ajax({
 		    type:"get",
@@ -40,17 +44,18 @@
 		    success: function(result){
 				var res = JSON.stringify(result);
 				accountList = result;
+				expenseTransactionData = result;
 				$("#expenseTableData").empty();
-				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Date</th><th scope='col'>Amount</th></tr></thead><tbody>";
+				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Date</th><th scope='col'>Amount</th><th scope='col'>Action</th></tr></thead><tbody>";
 				var count = 1;
 				for(var i in accountList) { 
-					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].title+"</b></td><td>"+accountList[i].date+"</td><td><b> $"+accountList[i].amount+"</b></td><td></tr>";
+					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].title+"</b></td><td>"+accountList[i].date+"</td><td><b> $"+accountList[i].amount+"</b></td><td><button  id='updateTransaction"+i+"' onclick='updateTransaction("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteTransaction"+i+"' onclick='deleteTransaction("+accountList[i].id+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></td></tr>";
 					count = count+1;
 					totalExpenses = totalExpenses + accountList[i].amount;
 				}
 				expenseData=expenseData+"</tbody></table>";
 				$("#expenseTableData").html(expenseData);
-				$(".totalExpenseSpent").html("$"+totalExpenses);
+				//$(".totalExpenseSpent").html("$"+totalExpenses);
 				
 		    },error: function(err){
 			}
@@ -58,6 +63,7 @@
   	}
   	
   	function loadIncomeTableData() {
+	//alert("head page loadIncomeTableData");
 	 var totalIncome = 0;
 		$.ajax({
 		    type:"get",
@@ -69,11 +75,12 @@
 		    success: function(result){
 				var res = JSON.stringify(result);
 				accountList = result;
+				incomeTransactionData = result;
 				$("#incomeTableData").empty();
-				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Date</th><th scope='col'>Amount</th></tr></thead><tbody>";
+				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Name</th><th scope='col'>Date</th><th scope='col'>Amount</th><th scope='col'>Action</th></tr></thead><tbody>";
 				var count = 1;
 				for(var i in accountList) { 
-					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].title+"</b></td><td>"+accountList[i].date+"</td><td><b>$"+accountList[i].amount+"</b></td><td></tr>";
+					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList[i].title+"</b></td><td>"+accountList[i].date+"</td><td><b>$"+accountList[i].amount+"</b></td><td><button  id='updateTransaction"+i+"' onclick='updateTransaction("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteTransaction"+i+"' onclick='deleteTransaction("+accountList[i].id+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></td></tr>";
 					count = count+1;
 					totalIncome = totalIncome + accountList[i].amount;
 				}
@@ -129,6 +136,13 @@ $(document).ready(function(){
 	    data["description"] = $("#categoryDesc").val();
 	    data["type"] = $("#categoryType").val();
 	    data["userId"] = localStorage.getItem("userId");
+	    if(data["title"]== null || data["title"] == undefined || data["title"] ==""|| data["title"].trim()=="" ||
+	    data["description"]== null || data["description"] == undefined || data["description"] ==""|| data["description"].trim()=="" ||
+	    data["type"]== null || data["type"] == undefined || data["type"] ==""|| data["type"].trim()==""){
+			$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>Fields Cannot be blank!</p>");
+				$("#errorAlert").modal("show");
+			return false;
+		}
 		$.ajax({
 		    type:"post",
 		    data: JSON.stringify(data),
@@ -145,16 +159,59 @@ $(document).ready(function(){
 			    $("#categoryType").val("");
 			    loadCategoryTableData();
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
 	});
 
+	$("#categoryUpdateSubmit").click(function(){
+		var data = {}
+	    data["title"] = $("#categoryUName").val();
+	    data["description"] = $("#categoryUDesc").val();
+	    data["type"] = $("#categoryUType").val();
+	    data["userId"] = localStorage.getItem("userId");
+	    if(data["title"]== null || data["title"] == undefined || data["title"] ==""|| data["title"].trim()=="" ||
+	    data["description"]== null || data["description"] == undefined || data["description"] ==""|| data["description"].trim()=="" ||
+	    data["type"]== null || data["type"] == undefined || data["type"] ==""|| data["type"].trim()==""){
+			$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>Fields Cannot be blank!</p>");
+				$("#errorAlert").modal("show");
+			return false;
+		}
+		$.ajax({
+		    type:"put",
+		    data: JSON.stringify(data),
+		    url:"/category/"+$("#categoryUId").val(),
+		    contentType: 'application/json',
+		    headers: {
+				"Authorization": "Bearer "+localStorage.getItem("token")
+			},
+		    success: function(result){
+				$("#categoryUpdateModal").modal('hide');
+				$("#successAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:green'>Category updated successfully</p>");
+				$("#successAlert").modal("show");
+				$("#categoryName").val("");
+			    $("#categoryDesc").val("");
+			    $("#categoryType").val("");
+			    loadCategoryTableData();
+		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
+			}
+		});
+	});
 
 	$("#accountSubmit").click(function(){
 		var data = {}
 	    data["name"] = $("#accountName").val();
 	    data["type"] = $("#accountType").val();
 	    data["userId"] = localStorage.getItem("userId");
+	    if(data["name"]== null || data["name"] == undefined || data["name"] ==""|| data["name"].trim()=="" ||
+	    data["type"]== null || data["type"] == undefined || data["type"] ==""|| data["type"].trim()==""){
+			$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>Fields Cannot be blank!</p>");
+				$("#errorAlert").modal("show");
+			return false;
+		}
 		$.ajax({
 		    type:"post",
 		    data: JSON.stringify(data),
@@ -170,75 +227,44 @@ $(document).ready(function(){
 	    		$("#accountType").val("");
 	    		loadAccountTableData();
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
 	});
 	
-	$("#expenseSubmit").click(function(){
+	$("#accountUpdateSubmit").click(function(){
 		var data = {}
-	    data["title"] = $("#expenseName").val();
-	    data["amount"] = $("#expenseAmount").val();
-	    data["categoryId"] = $("#selectedCategory").val();
-	    data["accountId"] = $("#selectedAccount").val();
-	    data["type"] = "expense";
+	    data["name"] = $("#accountUName").val();
+	    data["type"] = $("#accountUType").val();
 	    data["userId"] = localStorage.getItem("userId");
-	    data["date"] = $("#expenseDatepicker").val();
+	    if(data["name"]== null || data["name"] == undefined || data["name"] ==""|| data["name"].trim()=="" ||
+	    data["type"]== null || data["type"] == undefined || data["type"] ==""|| data["type"].trim()==""){
+			$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>Fields Cannot be blank!</p>");
+				$("#errorAlert").modal("show");
+			return false;
+		}
+	    //alert(JSON.stringify(data));
 		$.ajax({
-		    type:"post",
+		    type:"put",
 		    data: JSON.stringify(data),
-		    url:"/transaction",
+		    url:"/account/"+$("#accountUId").val(),
 		    contentType: 'application/json',
 		    headers: {
 				"Authorization": "Bearer "+localStorage.getItem("token")
 			},
 		    success: function(result){
-				$("#addExpenseModal").modal('hide');
-				$("#expenseAddeddSuccessAlert").modal("show");
-				$("#expenseName").val("");
-			    $("#expenseAmount").val("");
-			    $("#selectedCategory").val("");
-			    $("#selectedAccount").val("");
-			    $("#expenseDatepicker").val("");
-			    loadExpenseTableData();
-			    loadBudgetTableData();
+				$("#accountUpdateModal").modal('hide');
+				$("#accountUpdatedSuccessAlert").modal("show");
+				$("#accountUName").val("");
+	    		$("#accountUType").val("");
+	    		loadAccountTableData();
 		    },error: function(err){
+				//alert(JSON.stringify(err));
 			}
 		});
 	});
-
-
-	$("#incomeSubmit").click(function(){
-		var data = {}
-	    data["title"] = $("#incomeName").val();
-	    data["amount"] = $("#incomeAmount").val();
-	    data["categoryId"] = $("#selectedCategory").val();
-	    data["accountId"] = $("#selectedAccount").val();
-	    data["type"] = "income";
-	    data["userId"] = localStorage.getItem("userId");
-	    data["date"] = $("#incomeDatepicker").val();
-		$.ajax({
-		    type:"post",
-		    data: JSON.stringify(data),
-		    url:"/transaction",
-		    contentType: 'application/json',
-		    headers: {
-				"Authorization": "Bearer "+localStorage.getItem("token")
-			},
-		    success: function(result){
-				$("#addIncomeModal").modal('hide');
-				$("#incomeAddeddSuccessAlert").modal("show");
-				$("#incomeName").val("");
-			    $("#incomeAmount").val("");
-			    $("#selectedCategory").val("");
-			    $("#selectedAccount").val("");
-			    $("#incomeDatepicker").val("");
-			    loadIncomeTableData();
-			    loadBudgetTableData();
-		    },error: function(err){
-			}
-		});
-	});
-
+	
 });
 
 	var totalSpent = 0;
@@ -248,6 +274,7 @@ $(document).ready(function(){
 	var spentPercentage=0;
 	var earnPercentage=0; 
   	function loadBudgetTableData() {
+	//alert("head page loadBudgetTableData");
 		$.ajax({
 		    type:"get",
 		    url:"/budget/"+localStorage.getItem("userId")+"/"+monthNames[d.getMonth()]+"/"+new Date().getFullYear(),
@@ -261,19 +288,19 @@ $(document).ready(function(){
 				$("#budgetTableData").empty();
 				var expenseData = "";
 				for(var i in accountList.budgetTableResponse) { 
-					expenseData=expenseData+"<br><br><div class='card' style='background-color:#EEF2FC !important'><div class='card-body'><div class='row'><div class='col-3 mx-auto' style='margin-top:18px'><h4>"+accountList.budgetTableResponse[i].categoryName+"</h4></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price;
+					expenseData=expenseData+"<br><br><div class='card' style='background-color:#EEF2FC !important'><div class='card-body'><div class='row'><div class='col-2 mx-auto' style='margin-top:18px'><h4>"+accountList.budgetTableResponse[i].categoryName+"</h4></div><div class='col-2 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price;
 					if(accountList.budgetTableResponse[i].type==='expense'){
-						expenseData=expenseData+"</h4><small style='font-family: cursive;'>spent</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. expense</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div></div></div></div>";
+						expenseData=expenseData+"</h4><small style='font-family: cursive;'>spent</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. expense</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div><div class='col-2 mx-auto' style='margin-top:18px'><button  id='updateBudget"+i+"' onclick='updateBudget("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteBudget"+i+"' onclick='deleteBudget("+accountList.budgetTableResponse[i].budgetId+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></div></div></div></div>";
 					} else {
-						expenseData=expenseData+"</h4><small style='font-family: cursive;'>earned</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. income</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div></div></div></div>";
+						expenseData=expenseData+"</h4><small style='font-family: cursive;'>earned</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. income</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div><div class='col-2 mx-auto' style='margin-top:18px'><button  id='updateBudget"+i+"' onclick='updateBudget("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteBudget"+i+"' onclick='deleteBudget("+accountList.budgetTableResponse[i].budgetId+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></div></div></div></div>";
 					}
 				}
-				totalSpent = accountList.totalSpent;
-				totalEarn = accountList.totalEarn;
-				totalEstiSpent = accountList.totalEstiSpent;
-				totalEstiEarn = accountList.totalEstiEarn;
-				spentPercentage = accountList.spentPercentage;
-				earnPercentage = accountList.earnPercentage;
+				totalSpent = isNaN(accountList.totalSpent)?0:accountList.totalSpent;
+				totalEarn = isNaN(accountList.totalEarn)?0:accountList.totalEarn;
+				totalEstiSpent = isNaN(accountList.totalEstiSpent)?0:accountList.totalEstiSpent;
+				totalEstiEarn = isNaN(accountList.totalEstiEarn)?0:accountList.totalEstiEarn;
+				spentPercentage = isNaN(accountList.spentPercentage)?0:accountList.spentPercentage;
+				earnPercentage = isNaN(accountList.earnPercentage)?0:accountList.earnPercentage;
 				
 				$('.totalIncomeSpentPercent').text(earnPercentage+"%");
 				$('.totalExpenseSpentPercent').text(spentPercentage+"%");
@@ -283,40 +310,23 @@ $(document).ready(function(){
 				$('.progressExpenseCircle').attr("data-value", spentPercentage);
 				$("#budgetTableData").html(expenseData);
 				
-				$(".progressIncomeCircle").each(function() {
-			    var value = earnPercentage;
-			    var left = $(this).find('.progress-left .progress-bar');
-			    var right = $(this).find('.progress-right .progress-bar');
-			
-			    if (value > 0) {
-			      if (value <= 50) {
-			        right.css('transform', 'rotate(' + percentageToDegrees(value) + 'deg)')
-			      } else {
-			        right.css('transform', 'rotate(180deg)')
-			        left.css('transform', 'rotate(' + percentageToDegrees(value - 50) + 'deg)')
-			      }
-			    }
-			
-			  })
+				$("#progressIncomeCircle").circliful({
+				    animationStep: 5,
+				    foregroundBorderWidth: 15,
+				    backgroundBorderWidth: 15,
+				    percent: earnPercentage,
+					foregroundColor: 'green'
+				  });
 			  
-			  $(".progressExpenseCircle").each(function() {
-			
-			    var value = spentPercentage;
-			    var left = $(this).find('.progress-left .progress-bar');
-			    var right = $(this).find('.progress-right .progress-bar');
-			
-			    if (value > 0) {
-			      if (value <= 50) {
-			        right.css('transform', 'rotate(' + percentageToDegrees(value) + 'deg)')
-			      } else {
-			        right.css('transform', 'rotate(180deg)')
-			        left.css('transform', 'rotate(' + percentageToDegrees(value - 50) + 'deg)')
-			      }
-			    }
-			
-			  })
-				
-				
+			  
+			 // var value = spentPercentage;
+			  	$("#progressExpenseCircle").circliful({
+				    animationStep: 5,
+				    foregroundBorderWidth: 15,
+				    backgroundBorderWidth: 15,
+				    percent: spentPercentage,
+					foregroundColor: 'red'
+				  });				
 		    },error: function(err){
 			}
 		});
