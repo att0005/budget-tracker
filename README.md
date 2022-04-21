@@ -58,7 +58,7 @@ April 20 (95%)
  **
  
  ##Schema
- ![Schemapng](https://drive.google.com/file/d/1LAv9YEaC8BTWNvZjc4SJ_TR8bm6rgN-p/view?usp=sharing)
+ ![Schema](https://drive.google.com/file/d/12QS2uMQFupaDjpsfc2YUHQ1xFTZTKXRv/view?usp=sharing)
  
  **
  
