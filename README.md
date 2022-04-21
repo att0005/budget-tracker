@@ -62,7 +62,11 @@ April 20 (95%)
  
  ## Technical Challenages
 
+ This is my very first full stack application that I've ever build. I had no prior knowledge to any of the technology that was covered in this bootcamp, so I have had alot of challenges along the way.
  
+ 1. Sercurity
+ 2. Complex Entity Model
+ 3. Spring Controller
  
  
 
