@@ -11,10 +11,10 @@ body {
 }
 
 #home-section {
-	/*background: url("../images/keyboard.jpeg") no-repeat;*/
-	/*min-height: 700px;*/
-	/*background-size: cover;*/
-	/*background-attachment: fixed;*/
+	background: url("../images/keyboard.jpeg") no-repeat;
+	min-height: 700px;
+	background-size: cover;
+	background-attachment: fixed;
 }
 
 #home-section .dark-overlay {

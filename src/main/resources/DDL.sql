@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `mobile` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-);
+) ;
 
 CREATE TABLE IF NOT EXISTS `category` (
 `id` INT auto_increment,
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `category` (
   `date` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`user_id`) REFERENCES user(`id`)
-);
+) ;
 
 CREATE TABLE IF NOT EXISTS `account` (
   `id` INT auto_increment,

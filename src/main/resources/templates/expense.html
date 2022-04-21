@@ -87,9 +87,7 @@ function loadExpenseTableData(date) {
 				$('.totalExpenseSpent').text("$"+totalSpent+" out of $"+totalEstiSpent);
 				$('.totalIncomeSpent').text("$"+totalEarn+" out of $"+totalEstiEarn);
 				$("#budgetTableData").html(expenseData);
-
-                $("#progressExpenseCircle").empty();
-				
+				$("#progressExpenseCircle").empty();
 			 	 $("#progressExpenseCircle").circliful({
 				    animationStep: 15,
 				    foregroundBorderWidth: 10,
@@ -618,7 +616,7 @@ $(document).ready(function(){
 
 
 
-<footer th:replace="fragments/footer :: footer"></footer>
+<!--<footer th:replace="fragments/footer :: footer"></footer>-->
 <div th:replace="fragments/jsScripts :: scripts"></div>
 
 </body>

@@ -57,9 +57,7 @@ var totalSpent = 0;
 				$('.totalExpenseSpent').text("$"+totalSpent+" out of $"+totalEstiSpent);
 				$('.totalIncomeSpent').text("$"+totalEarn+" out of $"+totalEstiEarn);
 				$("#budgetTableData").html(expenseData);
-
-                $("#progressIncomeCircle").empty();
-				
+				$("#progressIncomeCircle").empty();
 				$("#progressIncomeCircle").circliful({
 				   animationStep: 15,
 				    foregroundBorderWidth: 10,
@@ -619,7 +617,7 @@ function updateTransaction(data){
 </div>
 
 
-<footer th:replace="fragments/footer :: footer"></footer>
+<!--<footer th:replace="fragments/footer :: footer"></footer>-->
 <div th:replace="fragments/jsScripts :: scripts"></div>
 
 </body>
