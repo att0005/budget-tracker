@@ -28,6 +28,15 @@ adding more datepicker for all the page
 April 15th (85%)
 finish adding datepicker on all pages, but having problems with visual chart and home page
  some reason my menu for adding cateorgy and account isnt working either. 
+ 
+ April 18 (85%)
+ work on Readme files
+ 
+ April 20 (95%)
+ deleted footer
+ change budgets html format
+ 
+ 
 
 
 
