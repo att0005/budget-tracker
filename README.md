@@ -41,6 +41,11 @@ April 20 (95%)
  * deleted footer
  * change budgets html format
  * added tables
+
+April 21 (95%)
+ *  cleaning up the code
+ *  testing the test case
+ *  working on readme file
  
  ***
  
