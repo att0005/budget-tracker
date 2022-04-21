@@ -3,11 +3,14 @@
 This is budgeting app. (Describe)
 
 ## content 
-User stories 
-Daily progress
-Schema 
-Technical challenages 
-Lesson learn. 
+- [User Stories](#user-stories) 
+- Daily progress
+- Technical Architecture
+- Schema 
+- Technical challenages 
+- Lesson learn
+- Future Improvements
+
 
 
 ##----Things to implentment-----
