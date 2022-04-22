@@ -3,6 +3,7 @@
 This is budgeting app. (Describe)
 
 ## content 
+- [Business Uses](#business-uses) 
 - [User Stories](#user-stories) 
 - [Daily progress](#daily-progress)
 - [Technical Architecture](#technical-architecture)
@@ -14,6 +15,10 @@ This is budgeting app. (Describe)
 
 
 ***
+
+ ## Business Uses
+ 
+UHG values improving the overall wellbeing of the people in society. Money have been always a stressor in my life and I feel like in alot of people life as well. Making sure bills get pay, making sure we have money for personal expenses, self-care, travel, kids, whatever it is. Knowing what you have and what you don't have is inportant to the going out societical life. So I made an app: Make Cents: a budgeting app. so that people are able to track and know their balance at any given point. 
 
 ## User Stories
 - As a user, I would like to transfer my budgets from month to month, so that I do not have to add my budget every month.
@@ -47,6 +52,9 @@ April 21 (95%)
  *  cleaning up the code
  *  testing the test case
  *  working on readme file
+
+April 22 (95%)
+ * working on the ppt/readme file
  
  ***
  
@@ -70,10 +78,20 @@ April 21 (95%)
 
  This is my very first full stack application that I've ever build. I had no prior knowledge to any of the technology that was covered in this bootcamp, so I have had alot of challenges along the way.
  
- 1. Sercurity
- 2. Complex Entity Model
- 3. Spring Controller
+ 1. Security
+     - I was having trouble with after registering, in the UserService  it wasnt saving the user to the authority table so that it can authenticate. 
+ 2. ThymeLeaf
+     - There was times where thymeleaf needed and sometime it didnt, and knowing when it does and doesnt was hard. 
+ 3. 
  
+ 
+ ***
+ 
+ ## Business Uses
+
+
+
+• what additional features could be added in the future
  
 
 
