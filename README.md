@@ -10,6 +10,7 @@ This is budgeting app. (Describe)
 - [Technical challenages](#technical-challenges) 
 - [Lesson learned](#lesson-learned)
 - [Future Improvements](#future-improvements)
+- [Case Study Rubic](https://docs.google.com/document/d/135zloojzSbYPCRQ9xbPkfRF35qibWc178vTd-4ZK_Zc/edit?usp=sharing)
 
 
 ***
