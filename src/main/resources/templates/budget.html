@@ -99,7 +99,7 @@
 				|| localStorage.getItem("userId") === undefined) {
 			window.location.replace("/");
 		} else {
-			$('#welcomeName').text("Whats up, " + localStorage.getItem("firstName") + " " + localStorage.getItem("lastName"));
+			$('#welcomeName').text("Welcome back, " + localStorage.getItem("firstName") + " " + localStorage.getItem("lastName"));
 		}
 		loadBudgetTableData(monthNames[d.getMonth()] + "/" + new Date().getFullYear());
 
@@ -386,7 +386,7 @@
 	<div class="row">
 		<div class="col-9 mx-auto" style="width: 20rem; margin-top: 50px;padding:25px;">
 			<h3 id="welcomeName" style="font-family: cursive;font-size: 40px;"></h3>
-			<small style="font-family: cursive;">This is your budget page, Do it wisely!</small>
+			<small style="font-family: cursive;">This is your budgets page. Make them wisely!</small>
 		</div>
 		<div class="col-3 mx-auto" style="width: 20rem; margin-top: 50px;padding:30px;">
 
