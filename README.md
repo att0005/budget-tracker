@@ -70,7 +70,7 @@ April 22 (95%)
  ***
  
  ## Schema
- ![Schema](https://drive.google.com/file/d/12QS2uMQFupaDjpsfc2YUHQ1xFTZTKXRv/view?usp=sharing)
+ ![Schema](https://live.staticflickr.com/65535/52025525862_b016cedf53_b.jpg)
  
  ***
  
