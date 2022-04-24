@@ -1,6 +1,5 @@
-# budget-tracker
+# Make Cents: a budgeting app
 
-This is budgeting app. (Describe)
 
 ## content 
 - [Business Uses](#business-uses) 
