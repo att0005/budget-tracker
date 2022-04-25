@@ -57,7 +57,9 @@ April 22 (95%)
  * working on the ppt/readme file
 
 April 25 (100%)
- * finish
+ * finishing touches
+ * change the fonts
+ * fix a bug
  
  ***
  
