@@ -11,6 +11,7 @@
 - [Lesson learned](#lesson-learned)
 - [Future Improvements](#future-improvements)
 - [Case Study Rubic](https://docs.google.com/document/d/135zloojzSbYPCRQ9xbPkfRF35qibWc178vTd-4ZK_Zc/edit?usp=sharing) (contact myself or Sang for access)
+- [PPT](https://docs.google.com/presentation/d/11rG4eg5KZv8rQUA7SkeovZBngkdGjUXJ4DSIwCtu42E/edit?usp=sharing)
 
 
 ***
