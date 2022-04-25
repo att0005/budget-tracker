@@ -1,7 +1,7 @@
 # Make Cents: a budgeting app
 
 
-## content 
+## Content 
 - [Business Uses](#business-uses) 
 - [User Stories](#user-stories) 
 - [Daily progress](#daily-progress)
@@ -89,7 +89,7 @@ April 25 (100%)
  
  ## Lesson Learned
  
- I have learned so much doing this project. Honestly, if you ask me to make an application three months ago, I wouldnt even know how or where to start. This training taught me alot and I am so excited to build more applications and to make things more interactive. 
+ I have learned so much doing this project. Honestly, if you ask me to make an application three months ago, I wouldnt even know how or where to start. This training taught me alot and I am so excited to build more applications and to make things more interactive in the future.
  
  ***
  
