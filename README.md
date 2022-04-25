@@ -1,7 +1,7 @@
 # Make Cents: a budgeting app
 
 
-## content 
+## Content 
 - [Business Uses](#business-uses) 
 - [User Stories](#user-stories) 
 - [Daily progress](#daily-progress)
@@ -10,7 +10,7 @@
 - [Technical challenages](#technical-challenges) 
 - [Lesson learned](#lesson-learned)
 - [Future Improvements](#future-improvements)
-- [Case Study Rubic](https://docs.google.com/document/d/135zloojzSbYPCRQ9xbPkfRF35qibWc178vTd-4ZK_Zc/edit?usp=sharing)
+- [Case Study Rubic](https://docs.google.com/document/d/135zloojzSbYPCRQ9xbPkfRF35qibWc178vTd-4ZK_Zc/edit?usp=sharing) (contact myself or Sang for access)
 
 
 ***
@@ -54,6 +54,9 @@ April 21 (95%)
 
 April 22 (95%)
  * working on the ppt/readme file
+
+April 25 (100%)
+ * finish
  
  ***
  
@@ -81,17 +84,21 @@ April 22 (95%)
      - I was having trouble with after registering, in the UserService  it wasnt saving the user to the authority table so that it can authenticate. 
  2. ThymeLeaf
      - There was times where thymeleaf needed and sometime it didnt, and knowing when it does and doesnt was hard. 
- 3. 
- 
  
  ***
  
- ## Business Uses
-
-
-
-• what additional features could be added in the future
+ ## Lesson Learned
  
+ I have learned so much doing this project. Honestly, if you ask me to make an application three months ago, I wouldnt even know how or where to start. This training taught me alot and I am so excited to build more applications and to make things more interactive in the future.
+ 
+ ***
+ 
+ ## Future Improvements
+
+- generate financial reports (balance spreadsheet, net worth, spending report)
+- link bank account and credit card account
+- Angular/React, Node.js
+- add more security, face recognition, email verification. 
 
 
 
