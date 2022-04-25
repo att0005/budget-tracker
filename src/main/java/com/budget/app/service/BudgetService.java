@@ -57,7 +57,7 @@ private static final Logger logger = LoggerFactory.getLogger(BudgetService.class
 			logger.info("Save budget completed for user : {}", user.getUsername());
 			return budgetDao.save(budget);
 		} else {
-
+			//budgetDto.get
 			if(budgetDto.getEstimatedExpense() != null)
 				budgetFromDB.setEstimatedExpense(Double.sum(budgetDto.getEstimatedExpense(), budgetFromDB.getEstimatedExpense()));
 			if(budgetDto.getEstimatedIncome() != null)

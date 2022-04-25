@@ -89,6 +89,8 @@ function loadTransactionTableData(date) {
 				expenseData=expenseData+"</tbody></table>";
 				$("#transactionTable").html(expenseData);
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
   	}
@@ -117,6 +119,8 @@ function loadTransactionTableData(date) {
 				expenseData=expenseData+"</tbody></table>";
 				$("#categoryTable").html(expenseData);
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
   	}
@@ -198,7 +202,6 @@ function loadTransactionTableData(date) {
 		    },error: function(err){
 				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
 				$("#errorAlert").modal("show");
-			
 			}
 		});
 	}
@@ -216,7 +219,13 @@ function loadTransactionTableData(date) {
 				result.incomeDtoList
 				incomeGraphData = result.incomeDtoList;
 				expenseGraphData = result.expenseDtoList;
-				Highcharts.chart('container', {
+				
+				if(incomeGraphData===null || incomeGraphData===undefined || incomeGraphData==="" || incomeGraphData.length===0){
+					$('.incomeGraphContainer').empty();
+					//$('.incomeGraphContainer').attr('style','height:30px')
+					$('.incomeGraphContainer').html("<p style='color:red;text-align: center;'><b>No records found for overall income</b></p>");
+				} else {
+					Highcharts.chart('container', {
 					    chart: {
 					        plotBackgroundColor: null,
 					        plotBorderWidth: null,
@@ -250,7 +259,12 @@ function loadTransactionTableData(date) {
 					        data: incomeGraphData
 					    }]
 					});
-					
+				}
+				
+				if(expenseGraphData===null || expenseGraphData===undefined || expenseGraphData==="" || expenseGraphData.length===0){
+					$('.expenseGraphContainer').empty();
+					$('.expenseGraphContainer').html("<p style='color:red;text-align: center;'><b>No records found for overall expense</b></p>");
+				} else {
 					Highcharts.chart('container1', {
 					    chart: {
 					        plotBackgroundColor: null,
@@ -285,7 +299,10 @@ function loadTransactionTableData(date) {
 					        data: expenseGraphData
 					    }]
 					});
+				}
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
 	}
@@ -325,7 +342,11 @@ function loadBudgetChartData(date) {
 					}
 				}
 				
-				Highcharts.chart('incomeBudget', {
+				if(incomeEarnedChartData.length===0 && incomeBudgetChartData.length===0){
+					$(".incomeBudgetGraph").empty();
+					$('.incomeBudgetGraph').html("<p style='color:red;text-align: center;'><b>No records found for income budget report</b></p>");
+				} else {
+					Highcharts.chart('incomeBudget', {
 
 				    chart: {
 				        type: 'column'
@@ -403,7 +424,12 @@ function loadBudgetChartData(date) {
 				        }]
 				    }
 				});
+				}
 				
+				if(expenseSpentChartData.length===0 && expenseBudgetChartData.length===0){
+					$(".expenseBudgetGraph").empty();
+					$('.expenseBudgetGraph').html("<p style='color:red;text-align: center;'><b>No records found for expense budget report</b></p>");
+				} else {
 				Highcharts.chart('expenseBudget', {
 
 				    chart: {
@@ -479,10 +505,12 @@ function loadBudgetChartData(date) {
 				        }]
 				    }
 				});
-
+			}
 				
 				
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
   	}
@@ -497,7 +525,7 @@ function loadBudgetChartData(date) {
     <div class="col-1"></div>
     <div class="col-8 mx-auto"  style="margin-top: 50px;padding:5px;">
     	<h3 id="welcomeName" style="font-family: cursive;font-size: 40px;"></h3>
-    	<small style="font-family: cursive;">Here your monthly report: </small>
+    	<small style="font-family: cursive;"> Here your monthly report: </small>
     </div>
     <div class="col-2 mx-auto" style="width: 20rem; margin-top: 50px;padding:30px;">
         <div class="form-group">
@@ -512,13 +540,13 @@ function loadBudgetChartData(date) {
 	<div style="padding-bottom:5px;">
 	    <div class="row">
 	   
-	    <div class="card col-5 mx-auto" style="width: 20rem; margin-top: 10px;">
+	    <div class="card col-5 mx-auto incomeBudgetGraph" style="width: 20rem; margin-top: 10px;">
 	       <figure class="highcharts-figure">
 			    <div id="incomeBudget"></div>
 			</figure>
 	    </div>
 	    
-	    <div class="card col-5 mx-auto" style="width: 20rem; margin-top: 10px;">
+	    <div class="card col-5 mx-auto expenseBudgetGraph" style="width: 20rem; margin-top: 10px;">
 	        <figure class="highcharts-figure">
 			    <div id="expenseBudget"></div>
 			</figure>
@@ -532,13 +560,13 @@ function loadBudgetChartData(date) {
 <div style="padding-bottom:5px;">
     <div class="row">
    
-    <div class="card col-5 mx-auto" style="width: 20rem; margin-top: 10px;">
+    <div class="card col-5 mx-auto incomeGraphContainer" style="width: 20rem; margin-top: 10px;">
        <figure class="highcharts-figure">
 		    <div id="container"></div>
 		</figure>
     </div>
    
-    <div class="card col-5 mx-auto" style="width: 20rem; margin-top: 10px;">
+    <div class="card col-5 mx-auto expenseGraphContainer" style="width: 20rem; margin-top: 10px;">
         <figure class="highcharts-figure">
 		    <div id="container1"></div>
 		</figure>
@@ -578,6 +606,17 @@ function loadBudgetChartData(date) {
     <div class="col-1"></div>
     </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 

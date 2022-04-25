@@ -58,6 +58,8 @@ budgetTableData={};
 				//$(".totalExpenseSpent").html("$"+totalExpenses);
 				
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
   	}
@@ -88,6 +90,8 @@ budgetTableData={};
 				$("#incomeTableData").html(expenseData);
 				$(".totalIncomeEarned").html("$"+totalIncome);
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
   	}
@@ -127,6 +131,8 @@ $(document).ready(function(){
 				var balance = '<H5 style="margin-top:10px; color:green">Balance: $'+result+'</H5>'
 				$("#balance").html(balance);
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
 	
@@ -260,7 +266,8 @@ $(document).ready(function(){
 	    		$("#accountUType").val("");
 	    		loadAccountTableData();
 		    },error: function(err){
-				//alert(JSON.stringify(err));
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
 	});
@@ -328,6 +335,8 @@ $(document).ready(function(){
 					foregroundColor: 'red'
 				  });				
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
   	}

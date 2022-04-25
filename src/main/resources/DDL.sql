@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `account` (
   `date` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`user_id`) REFERENCES user(`id`)
-) ;
+);
 
 CREATE TABLE IF NOT EXISTS `transaction` (
   `id` INT auto_increment,

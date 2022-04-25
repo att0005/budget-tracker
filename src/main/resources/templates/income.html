@@ -30,15 +30,20 @@ var totalSpent = 0;
 				var res = JSON.stringify(result);
 				accountList = result;
 				$("#budgetTableData").empty();
-				var expenseData = "";
+				var expenseData = "<table class='table table-hover'><thead><tr><th scope='col'>#</th><th scope='col'>Category Name</th><th scope='col'>Price</th><th scope='col'>Estimated Price</th><th scope='col'>Progress</th><th scope='col'>Action</th></tr></thead><tbody>";
+				var count = 1;
 				for(var i in accountList.budgetTableResponse) { 
-					expenseData=expenseData+"<br><br><div class='card' style='background-color:#EEF2FC !important'><div class='card-body'><div class='row'><div class='col-2 mx-auto' style='margin-top:18px'><h4>"+accountList.budgetTableResponse[i].categoryName+"</h4></div><div class='col-2 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price;
-					if(accountList.budgetTableResponse[i].type==='expense'){
-						expenseData=expenseData+"</h4><small style='font-family: cursive;'>spent</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. expense</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div><div class='col-2 mx-auto' style='margin-top:18px'><button  id='updateBudget"+i+"' onclick='updateBudget("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteBudget"+i+"' onclick='deleteBudget("+accountList.budgetTableResponse[i].budgetId+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></div></div></div></div>";
+					expenseData=expenseData+"<tr><th scope='row'>"+count+"</th><td><b>"+accountList.budgetTableResponse[i].categoryName+"</b></td>";
+					if (accountList.budgetTableResponse[i].type === 'expense') {
+						expenseData=expenseData+"<td><b>$"+accountList.budgetTableResponse[i].price+"</b> <br><small style='font-family: cursive;'>spent</small> </td><td><b>$"+accountList.budgetTableResponse[i].estimatedPrice+"</b><br><small style='font-family: cursive;'>esti. expense</small></td>";
 					} else {
-						expenseData=expenseData+"</h4><small style='font-family: cursive;'>earned</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>esti. income</small></div><div class='col-3 mx-auto'><h4>$"+accountList.budgetTableResponse[i].price+"/$"+accountList.budgetTableResponse[i].estimatedPrice+"</h4><small style='font-family: cursive;'>Progress</small></div><div class='col-2 mx-auto' style='margin-top:18px'><button  id='updateBudget"+i+"' onclick='updateBudget("+i+");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteBudget"+i+"' onclick='deleteBudget("+accountList.budgetTableResponse[i].budgetId+");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></div></div></div></div>";
+						expenseData=expenseData+"<td><b>$"+accountList.budgetTableResponse[i].price+"</b> <br><small style='font-family: cursive;'>earned</small> </td><td><b>$"+accountList.budgetTableResponse[i].estimatedPrice+"</b><br><small style='font-family: cursive;'>esti. income</small></td>";
 					}
+				
+					expenseData=expenseData+"<td><b>$" + accountList.budgetTableResponse[i].price + "/$" + accountList.budgetTableResponse[i].estimatedPrice +"</b><br><small style='font-family: cursive;'>Progress</small></td><td><button  id='updateBudget" + i + "' onclick='updateBudget(" + i + ");' class='btn btn-primary'><i class='fa fa-pencil fa-fw'></i></button> <button id='deleteBudget" + i + "' onclick='deleteBudget(" + accountList.budgetTableResponse[i].budgetId + ");' class='btn btn-danger' ><i class='fa fa-times fa-fw'></i></button></td></tr>";
+					count = count+1;
 				}
+				expenseData=expenseData+"</tbody></table>";
 				//totalSpent = accountList.totalSpent;
 				//totalEarn = accountList.totalEarn;
 				//totalEstiSpent = accountList.totalEstiSpent;
@@ -66,6 +71,8 @@ var totalSpent = 0;
 					foregroundColor: 'green'
 				  });				
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
   	}
@@ -97,6 +104,8 @@ var totalSpent = 0;
 				$("#incomeTableData").html(expenseData);
 				$(".totalIncomeEarned").html("$"+totalIncome);
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
   	}
@@ -171,6 +180,8 @@ $(document).ready(function(){
 				$("#selectCategoryData").html(categoryData);
 				$("#selectCategoryIData").html(categoryUData);
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
 	
@@ -197,6 +208,8 @@ $(document).ready(function(){
 				$("#selectAccountData").html(accountData);
 				$("#selectAccountIData").html(accountUData);
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
 		
@@ -257,6 +270,8 @@ $(document).ready(function(){
 			    loadIncomeTableData($('#incomeTableDatepicker').val());
 			    loadBudgetTableData(month+"/"+year);
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
 	});
@@ -304,6 +319,8 @@ $(document).ready(function(){
 			    loadIncomeTableData($('#incomeTableDatepicker').val());
 			    loadBudgetTableData(month+"/"+year);
 		    },error: function(err){
+				$("#errorAlert").children('.modal-dialog').children('.modal-content').children('span').html("<p style='font-size:20px;color:red'>"+err.responseJSON.message+"</p>");
+				$("#errorAlert").modal("show");
 			}
 		});
 	});
@@ -357,7 +374,7 @@ function updateTransaction(data){
     <div class="row">
     <div class="col-9 mx-auto"  style="width: 20rem; margin-top: 50px;padding:25px;">
     	<h3 id="welcomeName" style="font-family: cursive;font-size: 40px;"></h3>
-    	<small style="font-family: cursive;">These are your incomes. Make as much as you can!</small>
+    	<small style="font-family: cursive;">This is your income page. Make as much as you can!</small>
     </div>
     <div class="col-3 mx-auto" style="width: 20rem; margin-top: 50px;padding:30px;">
         <button type="button" id="addIncomeBtn"class="btn btn-success" style="float: right;" data-toggle="modal"><i class="fa fa-fax fa-fw"></i> Add Income</button>

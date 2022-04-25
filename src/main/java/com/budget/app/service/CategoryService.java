@@ -34,9 +34,9 @@ private static final Logger logger = LoggerFactory.getLogger(CategoryService.cla
 		Optional<User> userOptional = userDao.findById(categoryDto.getUserId());
 		User user = userOptional.isPresent() ? userOptional.get() : userOptional.orElseThrow(DataNotFoundException::new);
 		
-		Category categoryFromDb = categoryDao.findByTitle(categoryDto.getTitle());
+		Category categoryFromDb = categoryDao.findByTitleAndUserId(categoryDto.getTitle(),categoryDto.getUserId());
 		if(categoryFromDb != null) {
-			throw new BudgetTrackerException("Account name already exists");
+			throw new BudgetTrackerException("Category name already exists");
 		}
 		
 		Category category = new Category(user, categoryDto.getTitle(), 
