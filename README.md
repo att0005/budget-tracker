@@ -1,5 +1,6 @@
 # Make Cents: a budgeting app
-
+Angel Truong
+angel.truong18@gmail.com
 
 ## Content 
 - [Business Uses](#business-uses) 
